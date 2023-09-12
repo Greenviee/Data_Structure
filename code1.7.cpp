@@ -1,4 +1,4 @@
- #include <iostream>
+#include <iostream>
 #include <stdio.h>
 #include <stdlib.h>
 #include "time.h"
@@ -28,7 +28,7 @@ Matrix::Matrix(int row, int col) : rows(row), cols(col)
 }
 
 void Matrix::get_data() {
-	for (int i = 0; i < rows * cols; i++) {
+	for (int i = start; i <= finish ; i++) {
 		data[i] = rand() % 10;
 	}
 }
