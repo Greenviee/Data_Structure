@@ -40,34 +40,34 @@ int Matrix::GetData() {
 	return 0;
 }
 
-//Çà°ú ¿­À» ¹Ù²Ù´Â ÇÔ¼ö
+//í–‰ê³¼ ì—´ì„ ë°”ê¾¸ëŠ” í•¨ìˆ˜
 Matrix Matrix::Transpose() {
 	Matrix b(cols, rows);
 
 	int n = rows * cols;
 	for (int i = 0; i < cols; i++) {
-		//±¸Çö
+		//êµ¬í˜„
 	}
 	cout << endl;
 	return b;
 }
 
-//Çà·Ä °ö
+//í–‰ë ¬ ê³±
 Matrix Matrix::Multiply(Matrix b) {
-	//°ö¼À Á¶°Ç ¸¸Á· ¿©ºÎ
+	//ê³±ì…ˆ ì¡°ê±´ ë§Œì¡± ì—¬ë¶€
 	if (cols != b.rows) cout << "Incompatible matrices" << endl;
 	Matrix d(rows, b.cols);
 	for (int i = 0; i < rows; i++) {
 		for (int j = 0; j < b.cols; j++) {
-			//±¸Çö
+			//êµ¬í˜„
 		}
 	}
 	return d;
 }
 
-//Çà·Ä ÇÕ
+//í–‰ë ¬ í•©
 Matrix Matrix::Add(Matrix b) {
-	//ÇÕ Á¶°Ç ¸¸Á· ¿©ºÎ
+	//í•© ì¡°ê±´ ë§Œì¡± ì—¬ë¶€
 	if (cols != b.cols || rows != b.rows) cout << "Incompatible matrices" << endl;
 
 	Matrix d(rows, cols);
@@ -78,9 +78,9 @@ Matrix Matrix::Add(Matrix b) {
 	return d;
 }
 
-//Çà·Ä Â÷
+//í–‰ë ¬ ì°¨
 Matrix Matrix::Sub(Matrix b) {
-	//»¬¼À Á¶°Ç ¸¸Á· ¿©ºÎ
+	//ëº„ì…ˆ ì¡°ê±´ ë§Œì¡± ì—¬ë¶€
 	if (cols != b.cols || rows != b.rows) cout << "Incompatible matrices" << endl;
 
 	Matrix d(rows, cols);
