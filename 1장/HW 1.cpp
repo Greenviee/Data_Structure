@@ -3,8 +3,8 @@ using namespace std;
 
 class Matrix;
 
-//°¢ Ç× Ç¥ÇöÇÏ´Â Å¬·¡½º 
-//(coef, exp) = (°è¼ö, Áö¼ö), Áö¼ö´Â °¢ Ç×º°·Î µ¿ÀÏ 
+//ê° í•­ í‘œí˜„í•˜ëŠ” í´ë˜ìŠ¤ 
+//(coef, exp) = (ê³„ìˆ˜, ì§€ìˆ˜), ì§€ìˆ˜ëŠ” ê° í•­ë³„ë¡œ ë™ì¼ 
 class Term {
 	friend Matrix;
 private:
