@@ -47,7 +47,7 @@ Matrix Matrix::MultiplyMatrix(Matrix& b) {
 	if(cols != b.rows) cout << "ERROR" << endl;
 	Matrix c(rows, b.cols);
 	for (int i = 0; i < rows * b.cols; i++) {
-		//Ç× À§Ä¡ (x, y)
+		//Ã‡Ã— Ã€Â§Ã„Â¡ (x, y)
 		int x = i % cols;
 		int y = i / cols;
 		for(int j = 0; j < cols; j++) {
