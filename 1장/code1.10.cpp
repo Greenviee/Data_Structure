@@ -1,7 +1,7 @@
 #include <iostream>
 using namespace std;
 
-//n°³ÀÇ ¼ö¿­¿¡¼­ ÀÌºĞÅ½»ö
+//nê°œì˜ ìˆ˜ì—´ì—ì„œ ì´ë¶„íƒìƒ‰
 int BinarySearch(int* a, const int x, const int n) {
 	int left = 0, right = n - 1;
 	whlie(left <= right) {
@@ -10,6 +10,6 @@ int BinarySearch(int* a, const int x, const int n) {
 		else if (x > a[mid]) left = mid + 1;
 		else return mid;
 	}
-	//Ã£´Â °ªÀÌ ¾ø´Â °æ¿ì
+	//ì°¾ëŠ” ê°’ì´ ì—†ëŠ” ê²½ìš°
 	return -1;
 }
