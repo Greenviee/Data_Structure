@@ -1,7 +1,7 @@
 #include <iostream>
 using namespace std;
 
-//Àç±Í°¡ ¾Æ´Ñ ÇÇº¸³ªÄ¡ ÇÔ¼ö
+//ìž¬ê·€ê°€ ì•„ë‹Œ í”¼ë³´ë‚˜ì¹˜ í•¨ìˆ˜
 void Fibonacci_nonrec(int a[], int n) {
 	if (n <= 1) cout << n << endl;
 	else {
@@ -13,7 +13,7 @@ void Fibonacci_nonrec(int a[], int n) {
 	cout << endl;
 }
 
-//Àç±ÍÇÔ¼ö·Î ±¸ÇöÇÑ ÇÇº¸³ªÄ¡ ÇÔ¼ö
+//ìž¬ê·€í•¨ìˆ˜ë¡œ êµ¬í˜„í•œ í”¼ë³´ë‚˜ì¹˜ í•¨ìˆ˜
 void Fibonacci_rec(int* a, int n) {
 
 }
