@@ -14,10 +14,12 @@ public:
 	void get_data();
 	void show_data();
 	int sort_data();
-	Matrix& addMatrix(Matrix&);
-	//void addMatrix(Matrix&);
-	void MultiplyMatrix(Matrix&, Matrix&);
+	Matrix addMatrix(Matrix&);
+	Matrix MultiplyMatrix(Matrix&);
 };
+
+int Matrix::free = 0;
+int* Matrix::data = new int[100];
 
 Matrix::Matrix(int row, int col) : rows(row), cols(col) 
 {
@@ -33,7 +35,7 @@ void Matrix::get_data() {
 	}
 }
 
-Matrix& Matrix::addMatrix(Matrix& b) {
+Matrix Matrix::addMatrix(Matrix& b) {
 	if (rows != b.rows || cols != b.cols) cout << "ERROR" << endl;
 	Matrix d(rows, cols);
 	for (int i = 0; i < rows * cols; i++)
@@ -41,25 +43,24 @@ Matrix& Matrix::addMatrix(Matrix& b) {
 	return d;
 }
 
-/*
-void Matrix::addMatrix(Matrix& b) {
-	if (rows != b.rows || cols != b.cols) cout << "ERROR" << endl;
-	for (int i = 0; i < rows * cols; i++)
-		data[i] += b.data[i];
+Matrix Matrix::MultiplyMatrix(Matrix& b) {
+	if(cols != b.rows) cout << "ERROR" << endl;
+	Matrix c(rows, b.cols);
+	for (int i = 0; i < rows * b.cols; i++) {
+		//항 위치 (x, y)
+		int x = i % cols;
+		int y = i / cols;
+		for(int j = 0; j < cols; j++) {
+			c.data[i] += data[cols * y + j] + b.data[x + cols * j];
+		} 
+	}
+	return c;
 }
-*/
-
-Matrix& Matrix::MultiplyMatrix() {
-	//연습 
-}
-
-int Matrix::free = 0;
-int* Matrix::data = new int[100];
 
 
-//랜덤 값으로 행렬 값 채우기
+
 void Matrix::show_data() {
-	for (int i = 0; i < rows * cols; i++) {
+	for (int i = start; i <= finish; i++) {
 		cout << data[i] << ' ';
 		if (i % cols == cols - 1) cout << endl;
 	}
@@ -69,14 +70,26 @@ void Matrix::show_data() {
 int main() {
 	Matrix matrixA(3, 4);
 	Matrix matrixA1(3, 4);
+	Matrix matrixA2(3, 4);
 	Matrix matrixB(4, 5);
 	Matrix matrixC(3, 5);
 
 	srand(time(NULL));
+	
 	matrixA.get_data();
 	matrixA1.get_data();
-	matrixB.get_data();
+	matrixA2 = matrixA.addMatrix(matrixA1);
+	matrixC = matrixA.MultiplyMatrix(matrixB);
+	cout<<"matrixA: "<<endl;
+	matrixA.show_data();
+	cout<<"matrixA1: "<<endl;
+	matrixA1.show_data();
+	cout<<"matrixA2: "<<endl;
+	matrixA2.show_data();
+	cout<<"matrixB: "<<endl;
+	matrixB.show_data();
+	cout<<"matrixC: "<<endl;
+	matrixC.show_data();
 
-	system("pause");
 	return 0;
 }
