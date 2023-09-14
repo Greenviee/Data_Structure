@@ -45,11 +45,11 @@ void Matrix::addMatrix(Matrix& b) {
 */
 
 Matrix& Matrix::MultiplyMatrix() {
-	//ї¬ЅА 
+	//м—°мЉµ 
 }
 
 
-//·Јґэ °ЄАё·О За·Д °Є Г¤їм±в
+//лћњлЌ¤ к°’мњјлЎњ н–‰л ¬ к°’ м±„мљ°кё°
 void Matrix::show_data() {
 	for (int i = 0; i < rows * cols; i++) {
 		cout << data[i] << ' ';
