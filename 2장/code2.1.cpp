@@ -28,6 +28,22 @@ public:
 };
 
 template <class T>
+void Set::Push(const T&) {
+	//용량이 다 차면 늘리기 
+	if (top == capacity - 1)
+		// 현재 버젼은 ordering 상태에서 push한다. non-ordering되게 push가 가능하게 수정
+	{
+		ChangeSizeID(array, capacity, 2 * capacity);
+		capacity *= 2;
+	}
+	//중복 처리 
+	for (int i = 0; i <= top; i++) {
+		if (x == array[i]) return;
+	}
+	array[++top] = x;
+}
+
+template <class T>
 Bag<T>::Bag(int bagCapacity) : capacity(bagCapacity)
 {
 	if (capacity < 1) throw "Capacity must be > 0";
