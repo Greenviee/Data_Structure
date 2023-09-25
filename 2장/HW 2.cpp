@@ -2,17 +2,52 @@
 //template으로 구현하고 +, -, *, <<, >> operator를 사용한 버젼으로 구현한다.
 
 #include <iostream>
-
+#include <cstdlib>
+#include <cmath>
 using namespace std;
+
 template <class T> class Polynomial;
 
 template <class T> class Term
 {
+	Term operator+ (Term&);
+	Term operator- (Term&);
+	//*= -1
+	Term reverse();
 	friend Polynomial<T>;
+	friend ostream& operator<<(ostream&, Polynomial<T>&);
+	friend istream& operator>>(istream&, Polynomial<T>&);
+
 private:
 	T coef;
 	int exp;
 };
+
+template <class T>
+Term<T> Term<T>::operator+ (Term& b) {
+	if (exp != b.exp) cout << "Add Error" << endl;
+	Term<T> d = Term();
+	d.coef = coef + b.coef;
+	d.exp = exp;
+	return d;
+}
+
+template <class T>
+Term<T> Term<T>::operator- (Term& b) {
+	if (exp != b.exp) cout << "Subtract Error" << endl;
+	Term<T> d = Term();
+	d.coef = coef - b.coef;
+	d.exp = exp;
+	return d;
+}
+
+template <class T>
+Term<T> Term<T>::reverse() {
+	Term<T> d = Term();
+	d.coef = coef * -1;
+	d.exp = exp;
+	return d;
+}
 
 template <class T> class Polynomial {
 public:
@@ -26,8 +61,28 @@ public:
 	float Eval(float f);
 	//evaluate the polynomial *this at f and return the result
 	void NewTerm(const float theCoeff, const int theExp);
-	friend ostream& operator <<(ostream&, Polynomial&);//P(x)=5x^3+3x^1 형태로 출력, 계수가 0이면 해당항은 출력하지 않음
-	friend istream& operator >>(istream&, Polynomial&);
+	//P(x)=5x^3+3x^1 형태로 출력, 계수가 0이면 해당항은 출력하지 않음
+	friend ostream& operator<<(ostream& o, Polynomial& p)
+	{
+		o << "P(x)=";
+		for (int i = p.start; i <= p.finish; i++) {
+			if (termArray[i].coef >= 0) o << '+';
+			o << termArray[i].coef << "x^" << termArray[i].exp;
+		}
+		return o;
+	}
+	friend istream& operator>>(istream& i, Polynomial& p)
+	{
+		p.start = p.finish = free;
+		T c; int e;
+		i >> c >> e;
+		termArray[p.finish].coef = c;
+		termArray[p.finish].exp = e;
+		p.finish++;
+		free = p.finish;
+		p.finish--;
+		return i;
+	}
 private:
 	static Term<T>* termArray;
 	static int capacity;
@@ -35,12 +90,106 @@ private:
 	int start, finish;
 	int terms;
 };
+
 template <class T>
 Polynomial<T>::Polynomial()
 {
 	start = -1;
 	finish = -1;
 	terms = 0;
+}
+
+template <class T>
+Polynomial<T> Polynomial<T>::Add(Polynomial)
+{
+
+}
+
+template <class T>
+Polynomial<T> Polynomial<T>::operator+(Polynomial& b)
+{
+	Polynomial<T> d = Polynomial<T>();
+	d.start = d.finish = free;
+	//j = 아직 더하지 않은 b의 항 중 최고차항
+	int j = b.start;
+	for (int i = start; i <= finish; i++) {
+		//b의 지수가 더 큰 경우 d에 추가
+		while (termArray[j].exp > termArray[i].exp && j <= b.finish) {
+			termArray[d.finish] = termArray[j];
+			j++;
+			d.finish++;
+		}
+		//a랑 b의 지수가 같은 경우 합해서 d에 추가
+		if (j <= b.finish && termArray[j].exp == termArray[i].exp) {
+			termArray[d.finish] = termArray[i] + termArray[j];
+			j++;
+			d.finish++;
+		}
+		//아닐 경우
+		else {
+			termArray[d.finish] = termArray[i];
+			d.finish++;
+		}
+	}
+	//b의 항 중 더하지 않은 항 추가
+	while (j <= b.finish) {
+		termArray[d.finish] = termArray[j];
+		j++;
+		d.finish++;
+	}
+	free = d.finish;
+	d.finish--;
+	return d;
+}
+
+template <class T>
+Polynomial<T> Polynomial<T>::operator-(Polynomial& b)
+{
+	Polynomial<T> d = Polynomial<T>();
+	d.start = d.finish = free;
+	//j = 아직 빼지 않은 b의 항 중 최고차항
+	int j = b.start;
+	for (int i = start; i <= finish; i++) {
+		//b의 지수가 더 큰 경우 d에 추가
+		while (termArray[j].exp > termArray[i].exp && j <= b.finish) {
+			termArray[d.finish] = termArray[j].reverse();
+			j++;
+			d.finish++;
+		}
+		//a랑 b의 지수가 같은 경우 빼서 d에 추가
+		if (j <= b.finish && termArray[j].exp == termArray[i].exp) {
+			termArray[d.finish] = termArray[i] - termArray[j];
+			j++;
+			d.finish++;
+		}
+		//아닐 경우
+		else {
+			termArray[d.finish] = termArray[i];
+			d.finish++;
+		}
+	}
+	//b의 항 중 더하지 않은 항 추가
+	while (j <= b.finish) {
+		termArray[d.finish] = termArray[j].reverse();
+		j++;
+		d.finish++;
+	}
+	free = d.finish;
+	d.finish--;
+	return d;
+}
+
+template <class T>
+float Polynomial<T>::Eval(float f) {
+
+}
+
+template <class T>
+Polynomial<T> Polynomial<T>::operator*(Polynomial& b)
+{
+	Polynomial<T> d = Polynomial<T>();
+	d.start = d.finish = free;
+	return d;
 }
 
 template <class T>
@@ -74,7 +223,7 @@ int main(void) {
 
 	while (1) {
 		cout << "\n****** 메뉴선택 ******" << endl;
-		cout << "1: 덧셈, 2: 뺄셈, 3: 곱셈, 4. EValuate, 5. Exit" << endl;
+		cout << "1: 덧셈, 2: 뺄셈, 3: 곱셈, 4. Evaluate, 5. Exit" << endl;
 		cout << "Enter your choice:";
 		cin >> choice;
 		switch (choice) {
@@ -82,29 +231,25 @@ int main(void) {
 			cout << "\n--------------- Addition ---------------\n";
 			P3 = P1 + P2;
 			cout << P1 << P2 << P3;
-			cout << "----------------------------------------\n";
+			cout << "\n----------------------------------------\n";
 			break;
 		case 2:
 			cout << "\n------------- Substraction -------------\n";
 			P3 = P1 - P2;
 			cout << P1 << P2 << P3;
-			cout << "----------------------------------------\n";
+			cout << "\n----------------------------------------\n";
 			break;
 		case 3:
 			cout << "\n----------- Multiplication -------------\n";
 			P4 = P1 * P2;
 			cout << P1 << P2 << P4;
-			cout << "----------------------------------------\n";
+			cout << "\n----------------------------------------\n";
 			break;
-		//eval(x) : 다항식에 x를 대입했을 때의 결과 
-		case 4: 
-			int result = P4.Eval(3);
-			cout << P4;
-			cout << "result = " << result;
-			break;
-		case 0:
+		case 5:
 			cout << "Good Bye...!!!" << endl;
 			exit(0);
+		default:
+			cout << "Error" << endl;
 		}
 	}
 	system("pause");
