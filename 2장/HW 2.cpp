@@ -1,5 +1,5 @@
-//¼Ò½º ÄÚµå2.5: Polynomial Å¬·¡½º¸¦ »ç¿ëÇÏ¿© ±¸Çö
-//templateÀ¸·Î ±¸ÇöÇÏ°í +, -, *, <<, >> operator¸¦ »ç¿ëÇÑ ¹öÁ¯À¸·Î ±¸ÇöÇÑ´Ù.
+//ì†ŒìŠ¤ ì½”ë“œ2.5: Polynomial í´ë˜ìŠ¤ë¥¼ ì‚¬ìš©í•˜ì—¬ êµ¬í˜„
+//templateìœ¼ë¡œ êµ¬í˜„í•˜ê³  +, -, *, <<, >> operatorë¥¼ ì‚¬ìš©í•œ ë²„ì ¼ìœ¼ë¡œ êµ¬í˜„í•œë‹¤.
 
 #include <iostream>
 #include <cstdlib>
@@ -61,12 +61,12 @@ public:
 	float Eval(float f);
 	//evaluate the polynomial *this at f and return the result
 	void NewTerm(const float theCoeff, const int theExp);
-	//P(x)=5x^3+3x^1 ÇüÅÂ·Î Ãâ·Â, °è¼ö°¡ 0ÀÌ¸é ÇØ´çÇ×Àº Ãâ·ÂÇÏÁö ¾ÊÀ½
+	//P(x)=5x^3+3x^1 í˜•íƒœë¡œ ì¶œë ¥, ê³„ìˆ˜ê°€ 0ì´ë©´ í•´ë‹¹í•­ì€ ì¶œë ¥í•˜ì§€ ì•ŠìŒ
 	friend ostream& operator<<(ostream& o, Polynomial& p)
 	{
-		o << "P(x)=";
+		o << "P(x) = ";
 		for (int i = p.start; i <= p.finish; i++) {
-			if (termArray[i].coef >= 0) o << '+';
+			if (termArray[i].coef >= 0 && i != p.start) o << '+';
 			o << termArray[i].coef << "x^" << termArray[i].exp;
 		}
 		return o;
@@ -81,7 +81,7 @@ public:
 		p.finish++;
 		free = p.finish;
 		p.finish--;
-		return i;
+		return i; 
 	}
 private:
 	static Term<T>* termArray;
@@ -100,9 +100,40 @@ Polynomial<T>::Polynomial()
 }
 
 template <class T>
-Polynomial<T> Polynomial<T>::Add(Polynomial)
+Polynomial<T> Polynomial<T>::Add(Polynomial b)
 {
-
+	Polynomial<T> d = Polynomial<T>();
+	d.start = d.finish = free;
+	//j = ì•„ì§ ë”í•˜ì§€ ì•Šì€ bì˜ í•­ ì¤‘ ìµœê³ ì°¨í•­
+	int j = b.start;
+	for (int i = start; i <= finish; i++) {
+		//bì˜ ì§€ìˆ˜ê°€ ë” í° ê²½ìš° dì— ì¶”ê°€
+		while (termArray[j].exp > termArray[i].exp && j <= b.finish) {
+			termArray[d.finish] = termArray[j];
+			j++;
+			d.finish++;
+		}
+		//aë‘ bì˜ ì§€ìˆ˜ê°€ ê°™ì€ ê²½ìš° í•©í•´ì„œ dì— ì¶”ê°€
+		if (j <= b.finish && termArray[j].exp == termArray[i].exp) {
+			termArray[d.finish] = termArray[i] + termArray[j];
+			j++;
+			d.finish++;
+		}
+		//ì•„ë‹ ê²½ìš°
+		else {
+			termArray[d.finish] = termArray[i];
+			d.finish++;
+		}
+	}
+	//bì˜ í•­ ì¤‘ ë”í•˜ì§€ ì•Šì€ í•­ ì¶”ê°€
+	while (j <= b.finish) {
+		termArray[d.finish] = termArray[j];
+		j++;
+		d.finish++;
+	}
+	free = d.finish;
+	d.finish--;
+	return d;
 }
 
 template <class T>
@@ -110,28 +141,28 @@ Polynomial<T> Polynomial<T>::operator+(Polynomial& b)
 {
 	Polynomial<T> d = Polynomial<T>();
 	d.start = d.finish = free;
-	//j = ¾ÆÁ÷ ´õÇÏÁö ¾ÊÀº bÀÇ Ç× Áß ÃÖ°íÂ÷Ç×
+	//j = ì•„ì§ ë”í•˜ì§€ ì•Šì€ bì˜ í•­ ì¤‘ ìµœê³ ì°¨í•­
 	int j = b.start;
 	for (int i = start; i <= finish; i++) {
-		//bÀÇ Áö¼ö°¡ ´õ Å« °æ¿ì d¿¡ Ãß°¡
+		//bì˜ ì§€ìˆ˜ê°€ ë” í° ê²½ìš° dì— ì¶”ê°€
 		while (termArray[j].exp > termArray[i].exp && j <= b.finish) {
 			termArray[d.finish] = termArray[j];
 			j++;
 			d.finish++;
 		}
-		//a¶û bÀÇ Áö¼ö°¡ °°Àº °æ¿ì ÇÕÇØ¼­ d¿¡ Ãß°¡
+		//aë‘ bì˜ ì§€ìˆ˜ê°€ ê°™ì€ ê²½ìš° í•©í•´ì„œ dì— ì¶”ê°€
 		if (j <= b.finish && termArray[j].exp == termArray[i].exp) {
 			termArray[d.finish] = termArray[i] + termArray[j];
 			j++;
 			d.finish++;
 		}
-		//¾Æ´Ò °æ¿ì
+		//ì•„ë‹ ê²½ìš°
 		else {
 			termArray[d.finish] = termArray[i];
 			d.finish++;
 		}
 	}
-	//bÀÇ Ç× Áß ´õÇÏÁö ¾ÊÀº Ç× Ãß°¡
+	//bì˜ í•­ ì¤‘ ë”í•˜ì§€ ì•Šì€ í•­ ì¶”ê°€
 	while (j <= b.finish) {
 		termArray[d.finish] = termArray[j];
 		j++;
@@ -147,28 +178,28 @@ Polynomial<T> Polynomial<T>::operator-(Polynomial& b)
 {
 	Polynomial<T> d = Polynomial<T>();
 	d.start = d.finish = free;
-	//j = ¾ÆÁ÷ »©Áö ¾ÊÀº bÀÇ Ç× Áß ÃÖ°íÂ÷Ç×
+	//j = ì•„ì§ ë¹¼ì§€ ì•Šì€ bì˜ í•­ ì¤‘ ìµœê³ ì°¨í•­
 	int j = b.start;
 	for (int i = start; i <= finish; i++) {
-		//bÀÇ Áö¼ö°¡ ´õ Å« °æ¿ì d¿¡ Ãß°¡
+		//bì˜ ì§€ìˆ˜ê°€ ë” í° ê²½ìš° dì— ì¶”ê°€
 		while (termArray[j].exp > termArray[i].exp && j <= b.finish) {
 			termArray[d.finish] = termArray[j].reverse();
 			j++;
 			d.finish++;
 		}
-		//a¶û bÀÇ Áö¼ö°¡ °°Àº °æ¿ì »©¼­ d¿¡ Ãß°¡
+		//aë‘ bì˜ ì§€ìˆ˜ê°€ ê°™ì€ ê²½ìš° ë¹¼ì„œ dì— ì¶”ê°€
 		if (j <= b.finish && termArray[j].exp == termArray[i].exp) {
 			termArray[d.finish] = termArray[i] - termArray[j];
 			j++;
 			d.finish++;
 		}
-		//¾Æ´Ò °æ¿ì
+		//ì•„ë‹ ê²½ìš°
 		else {
 			termArray[d.finish] = termArray[i];
 			d.finish++;
 		}
 	}
-	//bÀÇ Ç× Áß ´õÇÏÁö ¾ÊÀº Ç× Ãß°¡
+	//bì˜ í•­ ì¤‘ ë”í•˜ì§€ ì•Šì€ í•­ ì¶”ê°€
 	while (j <= b.finish) {
 		termArray[d.finish] = termArray[j].reverse();
 		j++;
@@ -181,7 +212,11 @@ Polynomial<T> Polynomial<T>::operator-(Polynomial& b)
 
 template <class T>
 float Polynomial<T>::Eval(float f) {
-
+	float ret = 0;
+	for (int i = start; i <= finish; i++) {
+		ret += termArray[i].coef * pow(f, (float)termArray[i].exp);
+	}
+	return ret;
 }
 
 template <class T>
@@ -215,34 +250,43 @@ template <class T> int Polynomial<T>::free = 0;
 int main(void) {
 	int choice;
 	Polynomial<int> P1, P2, P3, P4;
-	cout << "´ÙÇ×½Ä Ãâ·Â ¿¹Á¦ : P(x)=5x^3+3x^1, P(x)=5x^3+3x^1\n";
-	cout << "´ÙÇ×½Ä P1 ÀÔ·Â: " << endl;
+	cout << "ë‹¤í•­ì‹ ì¶œë ¥ ì˜ˆì œ : P(x)=5x^3+3x^1, P(x)=5x^3+3x^1\n";
+	cout << "ë‹¤í•­ì‹ P1 ì…ë ¥: " << endl;
 	cin >> P1;
-	cout << "´ÙÇ×½Ä P2 ÀÔ·Â: " << endl;
+	cout << "ë‹¤í•­ì‹ P2 ì…ë ¥: " << endl;
 	cin >> P2;
-
+	
+	float n, result;
 	while (1) {
-		cout << "\n****** ¸Ş´º¼±ÅÃ ******" << endl;
-		cout << "1: µ¡¼À, 2: »¬¼À, 3: °ö¼À, 4. Evaluate, 5. Exit" << endl;
+		cout << "\n****** ë©”ë‰´ì„ íƒ ******" << endl;
+		cout << "1: ë§ì…ˆ, 2: ëº„ì…ˆ, 3: ê³±ì…ˆ, 4. Evaluate, 5. Exit" << endl;
 		cout << "Enter your choice:";
 		cin >> choice;
 		switch (choice) {
 		case 1:
 			cout << "\n--------------- Addition ---------------\n";
 			P3 = P1 + P2;
-			cout << P1 << P2 << P3;
+			cout << P1 << ' ' << P2 << ' ' << P3;
 			cout << "\n----------------------------------------\n";
 			break;
 		case 2:
 			cout << "\n------------- Substraction -------------\n";
 			P3 = P1 - P2;
-			cout << P1 << P2 << P3;
+			cout << P1 << ' ' << P2 << ' ' << P3;
 			cout << "\n----------------------------------------\n";
 			break;
 		case 3:
 			cout << "\n----------- Multiplication -------------\n";
 			P4 = P1 * P2;
-			cout << P1 << P2 << P4;
+			cout << P1 << ' ' << P2 << ' ' << P4;
+			cout << "\n----------------------------------------\n";
+			break;
+		case 4:
+			cout << "Put Value : ";
+			cin >> n;
+			result = P1.Eval(n);
+			cout << P1 << endl;
+			cout << "result = " << result;
 			cout << "\n----------------------------------------\n";
 			break;
 		case 5:
