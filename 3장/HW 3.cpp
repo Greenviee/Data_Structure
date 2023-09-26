@@ -1,13 +1,14 @@
-//¸ğµç ÇØ ±¸ÇÏ±â 
 #include <iostream>
 #include <cmath>
 #define ROW 8
 #define COL 8
 using namespace std;
+
 class Point {
 private:
 	int ix;
 	int iy;
+	friend void solveQueen(int d[][COL]);
 public:
 	Point() { ix = 0; iy = 0; }
 	Point(int x, int y) {
@@ -41,8 +42,8 @@ public:
 	T& Top() const;
 	void Push(const T& item);
 	T& Pop();
-	friend ostream& operator<<<T>(ostream& os, Stack<T>&);
-	friend istream& operator>><T>(istream& os, Stack<T>&);
+	friend ostream& operator<<(ostream& os, Stack<T>&);
+	friend istream& operator>>(istream& os, Stack<T>&);
 private:
 	T* stack;
 	int top;
@@ -105,56 +106,59 @@ T& Stack<T>::Pop()
 	if (IsEmpty()) throw "Stack is empty. Cannot delete.";
 	return stack[top--];
 }
-bool checkRow(int d[][COL], int crow) {/ 
+bool checkRow(int d[][COL], int crow) {
 	for (int i = 0; i < COL; i++) 
-		if (d[i][crow]==1) return false;
+		if (d[i][crow] == 1) return false;
 	return true;
 }
 
 bool checkCol(int d[][COL], int ccol) {
 	for (int i = 0; i < ROW; i++) 
-		if (d[ccol][i]==1) return false;
+		if (d[ccol][i] == 1) return false;
 	return true;
 }
 
 bool checkDiagSW(int d[][COL], int cx, int cy) { // x++, y-- or x--, y++ where 0<= x,y <= 7
-	int x = cx + 1, int y = cy - 1;
+	int x = cx + 1; int y = cy - 1;
 	while((0 <= x && x <= 7) && (0 <= y && y <= 7)) {
 		if (d[x][y] == 1) return false;
 		x++; y--;
 	} 
 	x = cx - 1; y = cy + 1;
 	while((0 <= x && x <= 7) && (0 <= y && y <= 7)) {
-		if(d[x][y] = 1) return false;
-			x--; y++;
+		if(d[x][y] == 1) return false;
+		x--; y++;
 	}
 	return true;
 }
 
 bool checkDiagSE(int d[][COL], int cx, int cy) {// x++, y++ or x--, y--
-	int x = cx + 1, int y = cy + 1;
+	int x = cx + 1; int y = cy + 1;
 	while((0 <= x && x <= 7) && (0 <= y && y <= 7)) {
 		if (d[x][y] == 1) return false;
 		x++; y++;
 	} 
 	x = cx - 1; y = cy - 1;
 	while((0 <= x && x <= 7) && (0 <= y && y <= 7)) {
-		if(d[x][y] = 1) return false;
+		if(d[x][y] == 1) return false;
 			x--; y--;
 	}
 	return true;
 }
 
-bool checkMove(int d[][COL], int x, int y) {//d¿¡¼­ ÄıÀ» (x,y)¿¡ ³õÀ» ¼ö ÀÖ´Â°¡? 
+bool checkMove(int d[][COL], int x, int y) {//dì—ì„œ í€¸ì„ (x,y)ì— ë†“ì„ ìˆ˜ ìˆëŠ”ê°€? 
 	return checkRow(d, x) && checkCol(d, y) && checkDiagSW(d, x, y) && checkDiagSE(d, x, y); 
 }
 
-int nextMove(int d[][COL], int row, int col) {//´ÙÀ½ Çà¿¡¼­ ÄıÀ» ³õÀ» ¼ö ÀÖ´Â °¡Àå ºü¸¥ À§Ä¡ 
-	for (int nextCol = 0; nextCol < 7; nextCol++)
-		if (checkMove(d, row, nextCol)) return nextCol;
+int nextMove(int d[][COL], int row, int col) {//ë‹¤ìŒ í–‰ì—ì„œ col ë¶€í„° í€¸ì„ ë†“ì„ ìˆ˜ ìˆëŠ” ê°€ì¥ ë¹ ë¥¸ ìœ„ì¹˜ 
+	//ë§ˆì§€ë§‰ ì—´ì¸ ê²½ìš°  
+	if (row == ROW - 1) return -1; 
+	
+	for (int nextCol = col; nextCol < 8; nextCol++)
+		if (checkMove(d, row + 1, nextCol)) return nextCol;
 	return -1;
 }
-//Board Ãâ·Â 
+//Board ì¶œë ¥ 
 void showQueens(int data[][COL]) {
 	for (int i = 0; i < ROW; i++) {
 		for (int j = 0; j < COL; j++) {
@@ -167,26 +171,56 @@ void showQueens(int data[][COL]) {
 //non-recursive 
 void solveQueen(int d[][COL]) {
 	int x = 0, y = 0;
-	//³õÀº ÄıÀÇ °³¼ö 
+	//ë†“ì€ í€¸ì˜ ê°œìˆ˜ 
 	int cnt = 0;
-	Point p(x, y) 
-	d[p.ix][p.iy] = 1; //(x, y)¿¡ ¹èÄ¡ 
-	Stack st;
+	Point p(x, y);
+	d[p.ix][p.iy] = 1; //(x, y)ì— ë°°ì¹˜ 
+	Stack<Point> st;
 	st.Push(p);
-	
+	cnt++;
+	while (!st.IsEmpty()) {
+		if (cnt == 8) showQueens(d);
+		//ë§Œì•½ ë‹¤ìŒ ì—´ì—ì„œ ë†“ì„ ê³µê°„ì´ ì—†ëŠ” ê²½ìš°
+		if (nextMove(d, st.Top().iy, 0) == -1) {
+			//ì§€ê¸ˆ ì—´ì—ì„œ ë†“ì„ ìˆ˜ ìˆëŠ” ë‹¤ìŒ ìœ„ì¹˜ push
+			int next = nextMove(d, st.Top().iy - 1, st.Top().ix + 1);
+			//ì§€ê¸ˆ ì—´ì— ë”ì´ìƒ ë†“ì„ ìˆ˜ ìˆëŠ” í€¸ì´ ì—†ëŠ” ê²½ìš° 
+			if(next == -1) {
+				d[st.Top().iy][st.Top().ix] = 0;
+				st.Pop();
+				cnt--;
+				//ì´ì „ ì—´ì— ë†“ì¸ í€¸ ì´ë™
+				 
+			} 
+			//ìˆëŠ” ê²½ìš° ë‹¤ìŒ ì¹¸ì— í€¸ ë°°ì¹˜ 
+			else {
+				Point n(next, st.Top().iy);
+				d[st.Top().iy][st.Top().ix] = 0;
+				st.Pop();
+				st.Push(n);
+				d[st.Top().iy][st.Top().ix] = 1;
+			}
+		}
+		//ë‹¤ìŒ ì—´ì— í€¸ì„ ë†“ì„ ê³µê°„ì´ ìˆëŠ” ê²½ìš° 
+		else {
+			int next = nextMove(d, st.Top().iy, 0);
+			Point next_queen(next, st.Top().iy + 1);
+			st.Push(next_queen);
+			d[st.Top().iy][st.Top().ix] = 1;
+			cnt++;
+		} 
+	}
 }
 
 
 
-void main() {
+int main() {
 	const int row = ROW, col = COL;
 	int data[row][col];
 	for (int i = 0; i < row; i++)
 		for (int j = 0; j < col; j++)
 			data[i][j] = 0;
-
 	solveQueen(data);
 	system("pause");
-	return;
+	return 0;
 }
-
