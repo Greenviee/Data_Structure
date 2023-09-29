@@ -4,6 +4,8 @@
 #include <iostream>
 #include <cstdlib>
 #include <cmath>
+#include <algorithm>
+#include "time.h"
 using namespace std;
 
 template <class T> class Polynomial;
@@ -12,6 +14,7 @@ template <class T> class Term
 {
 	Term operator+ (Term&);
 	Term operator- (Term&);
+	Term operator* (Term&);
 	//*= -1
 	Term reverse();
 	friend Polynomial<T>;
@@ -42,6 +45,14 @@ Term<T> Term<T>::operator- (Term& b) {
 }
 
 template <class T>
+Term<T> Term<T>::operator* (Term& b) {
+	Term<T> d = Term();
+	d.coef = coef * b.coef;
+	d.exp = exp + b.exp;
+	return d;
+}
+
+template <class T>
 Term<T> Term<T>::reverse() {
 	Term<T> d = Term();
 	d.coef = coef * -1;
@@ -67,21 +78,39 @@ public:
 		o << "P(x) = ";
 		for (int i = p.start; i <= p.finish; i++) {
 			if (termArray[i].coef >= 0 && i != p.start) o << '+';
-			o << termArray[i].coef << "x^" << termArray[i].exp;
+			if (termArray[i].exp == 0) 
+			    o << termArray[i].coef;
+			else
+			    o << termArray[i].coef << "x^" << termArray[i].exp;
 		}
+		o << endl;
 		return o;
 	}
 	friend istream& operator>>(istream& i, Polynomial& p)
 	{
-		p.start = p.finish = free;
-		T c; int e;
-		i >> c >> e;
-		termArray[p.finish].coef = c;
-		termArray[p.finish].exp = e;
-		p.finish++;
-		free = p.finish;
-		p.finish--;
-		return i; 
+		//항의 개수는 1~5개 중 랜덤, 항의 지수는 0 ~ 10, 계수는 1 ~ 10 사이 랜덤
+		//cnt : 항 개수
+		int cnt = rand() % 5 + 1;
+		p.start = free; p.finish = free + cnt - 1;
+		p.terms = cnt;
+		int exps[cnt];
+		for (int i = 0; i < cnt; i++) {
+		    exps[i] = rand() % 11;
+		    //지수 중복검사
+		    for (int j = 0; j < i; j++) {
+		        if (exps[i] == exps[j]) {
+		            i--;
+		            break;
+		        }
+		    }
+		}
+		sort(exps, exps + cnt, greater<int>());
+		for (int i = 0; i < cnt; i++) {
+		    termArray[p.start + i].exp = exps[i];
+		    termArray[p.start + i].coef = rand() % 10 + 1;
+		}
+		free += cnt;
+		return i;
 	}
 private:
 	static Term<T>* termArray;
@@ -223,7 +252,15 @@ template <class T>
 Polynomial<T> Polynomial<T>::operator*(Polynomial& b)
 {
 	Polynomial<T> d = Polynomial<T>();
-	d.start = d.finish = free;
+	Polynomial<T> p[terms];
+	for (int i = 0; i < terms; i++) {
+	    p[i].start = free; p[i].finish = free + b.terms - 1;
+	    free += b.terms;
+	    for (int j = 0; j < b.terms; j++) 
+	        termArray[p[i].start + j] = termArray[start + i] * termArray[b.start + j];
+	    if (i == 0) d = p[i];
+	    else d = d + p[i];
+	}
 	return d;
 }
 
@@ -243,17 +280,16 @@ void Polynomial<T>::NewTerm(const float theCoeff, const int theExp)
 }
 
 
-template <class T> int Polynomial<T>::capacity = 100;
-template <class T> Term<T>* Polynomial<T>::termArray = new Term<T>[100];
+template <class T> int Polynomial<T>::capacity = 200;
+template <class T> Term<T>* Polynomial<T>::termArray = new Term<T>[200];
 template <class T> int Polynomial<T>::free = 0;
 
 int main(void) {
+    srand(time(NULL));
 	int choice;
 	Polynomial<int> P1, P2, P3, P4;
 	cout << "다항식 출력 예제 : P(x)=5x^3+3x^1, P(x)=5x^3+3x^1\n";
-	cout << "다항식 P1 입력: " << endl;
 	cin >> P1;
-	cout << "다항식 P2 입력: " << endl;
 	cin >> P2;
 	
 	float n, result;
@@ -266,19 +302,19 @@ int main(void) {
 		case 1:
 			cout << "\n--------------- Addition ---------------\n";
 			P3 = P1 + P2;
-			cout << P1 << ' ' << P2 << ' ' << P3;
+			cout << P1 << P2 << P3;
 			cout << "\n----------------------------------------\n";
 			break;
 		case 2:
 			cout << "\n------------- Substraction -------------\n";
 			P3 = P1 - P2;
-			cout << P1 << ' ' << P2 << ' ' << P3;
+			cout << P1 << P2 << P3;
 			cout << "\n----------------------------------------\n";
 			break;
 		case 3:
 			cout << "\n----------- Multiplication -------------\n";
 			P4 = P1 * P2;
-			cout << P1 << ' ' << P2 << ' ' << P4;
+			cout << P1 << P2 << P4;
 			cout << "\n----------------------------------------\n";
 			break;
 		case 4:
