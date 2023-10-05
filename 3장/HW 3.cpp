@@ -4,6 +4,8 @@
 #define COL 8
 using namespace std;
 
+int num = 1;
+
 class Point {
 private:
 	int ix;
@@ -121,12 +123,12 @@ bool checkCol(int d[][COL], int ccol) {
 bool checkDiagSW(int d[][COL], int cx, int cy) { // x++, y-- or x--, y++ where 0<= x,y <= 7
 	int x = cx + 1; int y = cy - 1;
 	while((0 <= x && x <= 7) && (0 <= y && y <= 7)) {
-		if (d[x][y] == 1) return false;
+		if (d[y][x] == 1) return false;
 		x++; y--;
 	} 
 	x = cx - 1; y = cy + 1;
 	while((0 <= x && x <= 7) && (0 <= y && y <= 7)) {
-		if(d[x][y] == 1) return false;
+		if(d[y][x] == 1) return false;
 		x--; y++;
 	}
 	return true;
@@ -135,12 +137,12 @@ bool checkDiagSW(int d[][COL], int cx, int cy) { // x++, y-- or x--, y++ where 0
 bool checkDiagSE(int d[][COL], int cx, int cy) {// x++, y++ or x--, y--
 	int x = cx + 1; int y = cy + 1;
 	while((0 <= x && x <= 7) && (0 <= y && y <= 7)) {
-		if (d[x][y] == 1) return false;
+		if (d[y][x] == 1) return false;
 		x++; y++;
 	} 
 	x = cx - 1; y = cy - 1;
 	while((0 <= x && x <= 7) && (0 <= y && y <= 7)) {
-		if(d[x][y] == 1) return false;
+		if(d[y][x] == 1) return false;
 		x--; y--;
 	}
 	return true;
@@ -153,20 +155,23 @@ bool checkMove(int d[][COL], int x, int y) {//d에서 퀸을 (x,y)에 놓을 수
 int nextMove(int d[][COL], int row, int col) {//다음 행에서 col 부터 퀸을 놓을 수 있는 가장 빠른 위치 
 	//마지막 열인 경우  
 	if (row == ROW - 1) return -1; 
-	
 	for (int nextCol = col; nextCol < 8; nextCol++)
 		if (checkMove(d, nextCol, row + 1)) return nextCol;
 	return -1;
 }
 //Board 출력 
 void showQueens(int data[][COL]) {
+	cout << num << endl;
+	num++;
 	for (int i = 0; i < ROW; i++) {
 		for (int j = 0; j < COL; j++) {
 			if (data[i][j] == 1) cout << 'Q';
 			else cout << '-';
+			cout << ' ';
 		}
 		cout << endl;
 	}
+	cout << endl;
 }
 //non-recursive 
 void solveQueen(int d[][COL]) {
@@ -185,28 +190,33 @@ void solveQueen(int d[][COL]) {
 			//지금 열에서 놓을 수 있는 다음 위치 push
 			int next = nextMove(d, st.Top().iy - 1, st.Top().ix + 1);
 			//지금 열에 더이상 놓을 수 있는 퀸이 없는 경우 
-			if(next == -1) {
+			if (next == -1) {
 				d[st.Top().iy][st.Top().ix] = 0;
 				st.Pop();
 				cnt--;
 				//이전 열에 놓인 퀸 이동 
-				int before = nextMove(d, st.Top().iy - 1, st.Top().ix + 1);	
-				//이전 열에 더 이상 놓을 수 있는 공간이 없는 경우	
-				if (before == -1) {
+				d[st.Top().iy][st.Top().ix] = 0;
+				int before = nextMove(d, st.Top().iy - 1, st.Top().ix + 1);
+				if (before != -1) {
+					Point next_queen(before, st.Top().iy);
+					st.Pop();
+					st.Push(next_queen);
+					d[st.Top().iy][st.Top().ix] = 1;
+				}
+				else {
 					while (before == -1) {
-						d[st.Top().iy][st.Top().ix] = 0;
 						st.Pop();
 						if (st.IsEmpty()) return;
 						cnt--;
+						d[st.Top().iy][st.Top().ix] = 0;
 						before = nextMove(d, st.Top().iy - 1, st.Top().ix + 1);
 					}
-				}		 
-				Point n(before, st.Top().iy);
-				d[st.Top().iy][st.Top().ix] = 0;
-				st.Pop();
-				st.Push(n);
-				d[st.Top().iy][st.Top().ix] = 1;
-			} 
+					Point next_queen(before, st.Top().iy);
+					st.Pop();
+					st.Push(next_queen);
+					d[st.Top().iy][st.Top().ix] = 1;
+				}
+			}
 			//있는 경우 다음 칸에 퀸 배치 
 			else {
 				Point n(next, st.Top().iy);
@@ -223,13 +233,9 @@ void solveQueen(int d[][COL]) {
 			st.Push(next_queen);
 			d[st.Top().iy][st.Top().ix] = 1;
 			cnt++;
-			showQueens(d);
-			cout << endl;
 		} 
 	}
 }
-
-
 
 int main() {
 	const int row = ROW, col = COL;
