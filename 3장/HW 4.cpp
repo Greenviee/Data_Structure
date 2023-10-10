@@ -1,121 +1,8 @@
+//ì±…ì— ìˆëŠ” ì˜ˆì œ íŒŒì¼ì—ì„œ Pop()ì´ ì œëŒ€ë¡œ ì‘ë™í•˜ì§€ ì•Šì•„ì„œ STL ì‚¬ìš©í•˜ì˜€ìŠµë‹ˆë‹¤. 
 #include <iostream>
 #include <cstring>
+#include <stack>
 using namespace std;
-
-const int DefaultSize = 100;
-
-template <class T>
-class Bag {
-public:
-    Bag(int bagCapacity = 10);
-    ~Bag();
-    bool IsFull();
-    int Size() const;
-    bool IsEmpty() const;
-    virtual T& Pop();
-    virtual void Push(const T&);
-protected: // Bag Å¬·¡½º¿¡¼­ ¸â¹ö¿¡ Á¢±ÙÇÏ±â À§ÇØ protected·Î º¯°æ
-    T* array;
-    int capacity;
-    int top;
-};
-
-template <class T>
-Bag<T>::Bag(int bagCapacity) : capacity(bagCapacity)
-{
-    if (capacity < 1) throw "Capacity must be > 0";
-    array = new T[capacity];
-    top = -1;
-}
-
-template <class T>
-Bag<T>::~Bag() { delete[] array; }
-
-template <class T>
-int Bag<T>::Size() const {
-    return top + 1;
-}
-
-template <class T>
-bool Bag<T>::IsEmpty() const {
-    return top < 0;
-}
-
-template <class T>
-void Bag<T>::Push(const T& x)
-{
-    if (top == capacity - 1)
-    {
-        ChangeSizeID(array, capacity, 2 * capacity);
-        capacity *= 2;
-    }
-    array[++top] = x;
-}
-
-template <class T>
-T& Bag<T>::Pop()
-{
-    T retValue;
-    if (IsEmpty()) throw "Bag is empty, cannot delete";
-    int deletePos = top / 2;
-    retValue = array[deletePos];
-    memcpy(array + deletePos, array + deletePos + 1, (top - deletePos) * sizeof(T));
-    top--;
-    return retValue;
-}
-
-template <class T>
-inline bool Bag<T>::IsFull()
-{
-    return top == capacity - 1;
-}
-
-template <class T>
-void ChangeSizeID(T*& a, const int oldSize, const int newSize)
-{
-    if (newSize < 0) throw "New length must be >= 0";
-
-    T* temp = new T[newSize];
-    int number = oldSize;
-    if (oldSize > newSize) number = newSize;
-    memcpy(temp, a, number * sizeof(T));
-    delete[] a;
-    a = temp;
-}
-
-template <class T>
-class Stack : public Bag<T>
-{
-public:
-    Stack(int MaxStackSize = DefaultSize);
-    T& Pop();
-    void Push(const T&);
-private:
-    void StackEmpty() { cerr << "Stack is empty" << endl; }
-    void StackFull() { cerr << "Stack is full" << endl; }
-};
-
-template <class T>
-Stack<T>::Stack(int stackCapacity) : Bag<T>(stackCapacity)
-{
-    if (stackCapacity < 1) cerr << "Stack capacity must be > 0";
-    Bag<T>::array = new T[stackCapacity];
-    Bag<T>::top = -1;
-}
-
-template <class T>
-T& Stack<T>::Pop()
-{
-    if (Bag<T>::IsEmpty()) StackEmpty();
-    return Bag<T>::Pop();
-}
-
-template <class T>
-void Stack<T>::Push(const T& t)
-{
-    if (Bag<T>::IsFull()) StackFull();
-    Bag<T>::Push(t);
-}
 
 struct items {
     int x, y, dir;
@@ -139,8 +26,8 @@ int road[100][100];
 void viewMaze() {
     for (int i = 1; i < 13; i++) {
         for (int j = 1; j < 16; j++) {
-            if (road[i][j] == 1) cout << 2 << ' ';
-            else cout << maze[i][j] << ' ';
+        if (road[i][j] == 1) cout << 2 << ' ';
+        else cout << maze[i][j] << ' ';
         }
         cout << endl;
     }
@@ -150,13 +37,14 @@ void path(int m, int p)
 {
     mark[1][1] = 1;
     road[1][1] = 1;
-    Stack<items> stack(m * p);
+    stack<items> st;
     items temp;
     temp.x = 1; temp.y = 1; temp.dir = E;
-    stack.Push(temp);
+    st.push(temp);
 
-    while (!stack.IsEmpty()) {
-        temp = stack.Pop();
+    while (!st.empty()) {
+        temp = st.top();
+        st.pop();
         int i = temp.x; int j = temp.y; int d = temp.dir;
         while (d < 8) {
             int g = i + moves[d].b;
@@ -164,8 +52,9 @@ void path(int m, int p)
             if ((h == m) && (g == p)) {
                 road[h][g] = 1;
                 road[j][i] = 1;
-                while (!stack.IsEmpty()) {
-                    items T = stack.Pop();
+                while (!st.empty()) {
+                    items T = st.top();
+                    st.pop();
                     road[T.y][T.x] = 1;
                 }
                 viewMaze();
@@ -174,7 +63,7 @@ void path(int m, int p)
             if ((!maze[h][g]) && (!mark[h][g])) {
                 mark[h][g] = 1;
                 temp.x = i; temp.y = j; temp.dir = d + 1;
-                stack.Push(temp);
+                st.push(temp);
                 i = g; j = h; d = N;
             }
             else d++;
