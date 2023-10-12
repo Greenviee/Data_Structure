@@ -105,7 +105,7 @@ void CircularList::Add(Employee element) // 임의 값을 삽입할 때 리스트가 오름차�
 		return;
 	}
 	Node* p = first, *q = last;
-	while (p != first) {
+	do {
 		if (element < p->data) {
 			if (p == first) {
 				first = newNode;
@@ -119,9 +119,9 @@ void CircularList::Add(Employee element) // 임의 값을 삽입할 때 리스트가 오름차�
 		}
 		q = p;
 		p = p->link;
-	}
+	} while (p != first);
 	//맨 끝에 새 노드를 놓는 경우
-	newNode = last;
+	last = newNode;
 	q->link = last;
 	last->link = first;
 	return;
@@ -150,7 +150,7 @@ bool CircularList::Delete(string eno) // delete the element
 	return false;// 삭제할 대상이 없다.
 }
 
-ListIterator::ListIterator(const CircularList& lst) : list(lst), current(lst.first->link) {
+ListIterator::ListIterator(const CircularList& lst) : list(lst), current(lst.first) {
 }
 
 bool ListIterator::NotNull() {
@@ -166,7 +166,7 @@ bool ListIterator::NextNotNull() {
 		return false;
 }
 Employee* ListIterator::First() {
-	return &list.first->link->data;
+	return &list.first->data;
 }
 Employee* ListIterator::Next() {
 	Employee* e = &current->data;
@@ -308,7 +308,9 @@ int main() {
 		case AVG:  cout << "avg() = " << avg(*l) << endl; break;
 		case MIN:  cout << "min() = " << min(*l) << endl; break;
 		case MAX:  cout << "max() = " << max(*l) << endl; break;
-		case Exit: // 꼬리 노드 삭제
+		case Exit: 
+			cout << "Exit";
+			exit(1);
 			break;
 		}
 	} while (static_cast<Enum>(selectMenu) != Exit);
