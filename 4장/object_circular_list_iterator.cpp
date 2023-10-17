@@ -141,6 +141,12 @@ bool CircularList::Delete(string eno) // delete the element
 	do {
 		if (p->data.eno == eno) {
 			prev->link = p->link;
+			if (p == first) {
+				first = p->link;
+			}
+			if (p == last) {
+				last = prev;
+			}
 			delete p;
 			return true;
 		}
