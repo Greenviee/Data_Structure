@@ -14,21 +14,23 @@ public:
 	Employee() {}
 	Employee(string sno, string sname) :eno(sno), ename(sname) {}
 	friend ostream& operator<<(ostream& os, Employee&);
-	bool operator<(Employee& e) {
-		if (stoi(eno) < stoi(e.eno)) return true;
-		return false;
-	}
-	bool operator==(Employee& e) {
-		if (eno == e.eno && ename == e.ename) return true;
-		return false;
-	}
+	bool operator<(Employee&);
+	bool operator==(Employee&);
 };
-
-ostream& operator<<(ostream& os, Employee& e) {
-	os << "No: " << e.eno << " Name: " << e.ename << endl;
+ostream& operator<<(ostream& os, Employee& emp) {
+	os << "No: " << emp.eno << " Name: " << emp.ename << endl;
 	return os;
 }
-
+bool Employee::operator==(Employee& emp) {
+	if (eno == emp.eno && ename == emp.ename)
+		return true;
+	return false;
+}
+bool Employee::operator<(Employee& emp) {
+	if (stoi(eno) < stoi(emp.eno))
+		return true;
+	return false;
+}
 class Node {
 	friend class LinkedList;
 	Employee data;
@@ -50,120 +52,152 @@ public:
 	void Show();
 	void Add(Employee);//sno로 정렬되도록 구현
 	bool Search(string);
-	bool operator>(Employee);
-	bool operator==(Employee);
+	LinkedList& operator+(LinkedList&);
 };
 void LinkedList::Show() { // 전체 리스트를 순서대로 출력한다.
 	Node* p = first;
-	if (first == nullptr) {
-		cout << "Empty List" << endl;
-		return;
-	}
 	while (p != nullptr) {
 		cout << p->data;
 		p = p->link;
 	}
-	cout << endl;
 }
 void LinkedList::Add(Employee element) // 임의 값을 삽입할 때 리스트가 오름차순으로 정렬이 되도록 한다
 {
 	Node* newNode = new Node(element);
-	if (first == nullptr) { //linked list가 비어있는 경우
+	Node* p = first, * q = nullptr;
+	if (p == nullptr) {
 		first = newNode;
 		return;
 	}
-	Node* p = first;
-	if (element < p->data) {
-		newNode->link = p;
-		first = newNode;
-	}
-	else {
-		while (p->link != nullptr) {
-			if (element < p->link->data) {
-				newNode->link = p->link;
-				p->link = newNode;
+	while (p != nullptr) {
+		if (element < p->data) {
+			if (p == first) {
+				newNode->link = p;
+				first = newNode;
 				return;
 			}
-			else p = p->link;
+			newNode->link = p;
+			q->link = newNode;
+			return;
 		}
-		p->link = newNode;
+		q = p;
+		p = p->link;
 	}
+	q->link = newNode;
+	return;
 }
 bool LinkedList::Search(string eno) { // sno를 갖는 레코드를 찾기
 	Node* p = first;
 	while (p != nullptr) {
-		if (p->data.eno == eno) return true;
+		if (p->data.ename == eno)
+			return true;
 		p = p->link;
 	}
 	return false;
 }
 bool LinkedList::Delete(string eno) // delete the element
 {
-	Node* p = first;
-	Node* prev = nullptr;
+	Node* p = first, * q = nullptr;
 	while (p != nullptr) {
 		if (p->data.eno == eno) {
-			if (prev == nullptr) { //삭제할 노드가 첫번째 노드인 경우
+			if (p == first) {
 				first = p->link;
+				delete p;
+				return true;
 			}
-			else {
-				prev->link = p->link;
-			}
+			q->link = p->link;
 			delete p;
 			return true;
 		}
-		prev = p;
+		q = p;
 		p = p->link;
 	}
-	return false;// 삭제할 대상이 없다.
+	return false;
 }
-
+LinkedList& LinkedList::operator+(LinkedList& lb) {
+	LinkedList lc;
+	Node* a = first, * b = lb.first;
+	while (a != nullptr && b != nullptr) {
+		if (a->data < b->data) {
+			lc.Add(a->data);
+			a = a->link;
+		}
+		else {
+			lc.Add(b->data);
+			b = b->link;
+		}
+	}
+	while (a != nullptr) {
+		lc.Add(a->data);
+		a = a->link;
+	}
+	while (b != nullptr) {
+		lc.Add(b->data);
+		b = b->link;
+	}
+	return lc;
+}
 enum Enum {
-	Add, Delete, Show, Search, Exit
+	Add1, Add2, Delete, Show, Search, Merge, Exit
 };
 
-int main() {
+void main() {
 	Enum menu; // 메뉴
 	int selectMenu, num;
 	string eno, ename;
-	Employee data;
 	bool result = false;
-	srand(time(NULL));
-	LinkedList* l = new LinkedList();
+	LinkedList la, lb, lc;
+	Employee* data;
 	do {
-		cout << "0.ADD, 1.Delete, 2.Show, 3.Search, 4. Exit" << endl << "선택::";
+		cout << "0.Add0, 1. Add1, 2.Delete, 3.Show, 4.Search, 5. Merge, 6. Exit" << endl << "선택::";
 		cin >> selectMenu;
 		switch (static_cast<Enum>(selectMenu)) {
-		case Add:
+		case Add1:
 			cout << "사원번호 입력:: ";
 			cin >> eno;
 			cout << "사원 이름 입력:: ";
 			cin >> ename;
-			data = Employee(eno, ename);
-			l->Add(data);
+			data = new Employee(eno, ename);
+			la.Add(*data);
+			break;
+		case Add2:
+			cout << "사원번호 입력:: ";
+			cin >> eno;
+			cout << "사원 이름 입력:: ";
+			cin >> ename;
+			data = new Employee(eno, ename);
+			lb.Add(*data);
 			break;
 		case Delete:
 			cout << "사원번호 입력:: ";
 			cin >> eno;
-			result = l->Delete(eno);
+			result = la.Delete(eno);
 			if (result)
 				cout << "삭제 완료" << endl;
 			break;
 		case Show:
-			l->Show();
+			cout << "리스트 la: " << endl;
+			la.Show();
+			cout << "리스트 lb: " << endl;
+			lb.Show();
 			break;
 		case Search:
 			cout << "사원번호 입력:: ";
 			cin >> eno;
-			result = l->Search(eno);
+			result = la.Search(eno);
 			if (!result)
 				cout << "검색 값 = " << eno << " 데이터가 없습니다." << endl;
 			else
 				cout << "검색 값 = " << eno << " 데이터가 존재합니다." << endl;
 			break;
+		case Merge:
+			lc = la + lb;
+			cout << "리스트 lc = ";
+			lc.Show();
+			break;
+
 		case Exit: // 꼬리 노드 삭제
 			cout << "Exit" << endl;
-			exit(1);
 			break;
 		}
 	} while (static_cast<Enum>(selectMenu) != Exit);
