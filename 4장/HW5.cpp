@@ -1,7 +1,7 @@
 /*
-6´Ü°è- ¿øÇü °´Ã¼ ¿¬°á ¸®½ºÆ®ÀÇ available list, getNode, retNode
-head node¸¦ °®°í ÀÖ°í »èÁ¦µÈ ³ëµåµéÀº available list¿¡ ¸®ÅÏÇÑ´Ù.
-CircularList¸¦ ´ë»óÀ¸·Î ÇÑ iterator¸¦ ±¸ÇöÇÑ´Ù.
+6ë‹¨ê³„- ì›í˜• ê°ì²´ ì—°ê²° ë¦¬ìŠ¤íŠ¸ì˜ available list, getNode, retNode
+head nodeë¥¼ ê°–ê³  ìˆê³  ì‚­ì œëœ ë…¸ë“œë“¤ì€ available listì— ë¦¬í„´í•œë‹¤.
+CircularListë¥¼ ëŒ€ìƒìœ¼ë¡œ í•œ iteratorë¥¼ êµ¬í˜„í•œë‹¤.
 */
 #include <iostream>
 #include <time.h>
@@ -75,15 +75,15 @@ public:
 
 class CircularList {
 	friend class ListIterator;
-	Node* first;//last ³ëµå¸¦ °¡¸®Å°´Â last º¯¼ö¸¦ »ç¿ëÇÏ´Â ¹öÁ¯À¸·Î ±¸Çö ½Ç½À 
+	Node* last;//last ë…¸ë“œë¥¼ ê°€ë¦¬í‚¤ëŠ” last ë³€ìˆ˜ë¥¼ ì‚¬ìš©í•˜ëŠ” ë²„ì ¼ìœ¼ë¡œ êµ¬í˜„ ì‹¤ìŠµ 
 	static Node* av;
 public:
 	CircularList() {
-		first = new Node(); first->link = first;
+		last = new Node(); last->link = last;
 	}
 	bool Delete(string);
 	void Show();
-	void Add(Employee*);//sno·Î Á¤·ÄµÇµµ·Ï ±¸Çö
+	void Add(Employee*);//snoë¡œ ì •ë ¬ë˜ë„ë¡ êµ¬í˜„
 	bool Search(string);
 	Node* GetNode();
 	void RetNode(Node*);
@@ -139,16 +139,18 @@ ostream& operator<<(ostream& os, CircularList& l) {
 	}
 	return os;
 }
-void CircularList::Show() { // ÀüÃ¼ ¸®½ºÆ®¸¦ ¼ø¼­´ë·Î Ãâ·ÂÇÑ´Ù.
+void CircularList::Show() { // ì „ì²´ ë¦¬ìŠ¤íŠ¸ë¥¼ ìˆœì„œëŒ€ë¡œ ì¶œë ¥í•œë‹¤.
+	Node* first = last->link;
 	Node* p = first->link;
 	while (p != first) {
 		cout << p->data;
 		p = p->link;
 	}
 }
-void CircularList::Add(Employee* element) // ÀÓÀÇ °ªÀ» »ğÀÔÇÒ ¶§ ¸®½ºÆ®°¡ ¿À¸§Â÷¼øÀ¸·Î Á¤·ÄÀÌ µÇµµ·Ï ÇÑ´Ù
+void CircularList::Add(Employee* element) // ì„ì˜ ê°’ì„ ì‚½ì…í•  ë•Œ ë¦¬ìŠ¤íŠ¸ê°€ ì˜¤ë¦„ì°¨ìˆœìœ¼ë¡œ ì •ë ¬ì´ ë˜ë„ë¡ í•œë‹¤
 {
 	Node* newNode = GetNode(); newNode->data = *element;
+	Node* first = last->link;
 	Node* p = first->link;
 	Node* q = first;
 	while (p != first) {
@@ -160,11 +162,13 @@ void CircularList::Add(Employee* element) // ÀÓÀÇ °ªÀ» »ğÀÔÇÒ ¶§ ¸®½ºÆ®°¡ ¿À¸§Â÷
 		q = p;
 		p = p->link;
 	}
-	q->link = newNode; //¸Ç ³¡¿¡ ³ëµå¸¦ Ãß°¡ÇÏ´Â °æ¿ì
+	q->link = newNode; //ë§¨ ëì— ë…¸ë“œë¥¼ ì¶”ê°€í•˜ëŠ” ê²½ìš°
 	newNode->link = first;
+	last = newNode;
 	return;
 }
-bool CircularList::Search(string eno) { // sno¸¦ °®´Â ·¹ÄÚµå¸¦ Ã£±â
+bool CircularList::Search(string eno) { // snoë¥¼ ê°–ëŠ” ë ˆì½”ë“œë¥¼ ì°¾ê¸°
+	Node* first = last->link;
 	Node* p = first->link;
 	while (p != first) {
 		if (p->data.eno == eno)
@@ -174,10 +178,13 @@ bool CircularList::Search(string eno) { // sno¸¦ °®´Â ·¹ÄÚµå¸¦ Ã£±â
 	return false;
 }
 bool CircularList::Delete(string eno) { // delete the element
+	Node* first = last->link;
 	Node* p = first->link;
 	Node* q = first;
 	while (p != first) {
 		if (p->data.eno == eno) {
+			if (p == last)
+				last = q;
 			q->link = p->link;
 			RetNode(p);
 			return true;
@@ -224,16 +231,16 @@ CircularList& CircularList::operator+(CircularList& lb) {
 	}
 	return lc;
 }
-ListIterator::ListIterator(const CircularList& lst) : list(lst), current(lst.first->link) {
+ListIterator::ListIterator(const CircularList& lst) : list(lst), current(lst.last->link->link) {
 }
 bool ListIterator::NotNull() {
-	return current != list.first;
+	return current != list.last->link;
 }
 bool ListIterator::NextNotNull() {
-	return current->link != list.first;
+	return current->link != list.last->link;
 }
 Employee* ListIterator::First() {
-	current = list.first->link;
+	current = list.last->link->link;
 	return &current->data;
 }
 Employee* ListIterator::Next() {
@@ -274,8 +281,8 @@ bool ListIterator::operator != (const ListIterator right) const {
 bool ListIterator::operator == (const ListIterator right) const {
 	return current == right.current;
 }
-//int printAll(const List& l);//list iterator¸¦ »ç¿ëÇÏ¿© ÀÛ¼ºÇÏ´Â ¿¬½À
-//int sumProductFifthElement(const List& l);//list iterator¸¦ »ç¿ëÇÏ¿© ÀÛ¼ºÇÏ´Â ¿¬½À
+//int printAll(const List& l);//list iteratorë¥¼ ì‚¬ìš©í•˜ì—¬ ì‘ì„±í•˜ëŠ” ì—°ìŠµ
+//int sumProductFifthElement(const List& l);//list iteratorë¥¼ ì‚¬ìš©í•˜ì—¬ ì‘ì„±í•˜ëŠ” ì—°ìŠµ
 int sum(const CircularList& l) {
 	ListIterator li(l);
 	Employee* p = li.First();
@@ -327,10 +334,10 @@ enum Enum {
 	Add0, Add1, Delete, Show, Search, Merge, SUM, AVG, MIN, MAX, Exit
 };
 
-Node* CircularList::av = NULL;//static º¯¼öÀÇ ÃÊ±âÈ­ ¹æ¹ıÀ» ±â¾ïÇØ¾ß ÇÑ´Ù
+Node* CircularList::av = NULL;//static ë³€ìˆ˜ì˜ ì´ˆê¸°í™” ë°©ë²•ì„ ê¸°ì–µí•´ì•¼ í•œë‹¤
 
 int main() {
-	Enum menu; // ¸Ş´º
+	Enum menu; // ë©”ë‰´
 	int selectMenu, num;
 	string eno, ename;
 	int pay;
@@ -338,69 +345,69 @@ int main() {
 	bool result = false;
 	CircularList la, lb, lc;
 	do {
-		cout << "0.Add0, 1.Add1, 2.Delete, 3.Show, 4.Search, 5.Merge, 6. sum, 7.avg, 8.min, 9.max, 10.exit" << endl << "¼±ÅÃ::";
+		cout << "0.Add0, 1.Add1, 2.Delete, 3.Show, 4.Search, 5.Merge, 6. sum, 7.avg, 8.min, 9.max, 10.exit" << endl << "ì„ íƒ::";
 		cin >> selectMenu;
 		switch (static_cast<Enum>(selectMenu)) {
 		case Add0:
-			cout << "»ç¿ø¹øÈ£ ÀÔ·Â:: ";
+			cout << "ì‚¬ì›ë²ˆí˜¸ ì…ë ¥:: ";
 			cin >> eno;
-			cout << "»ç¿ø ÀÌ¸§ ÀÔ·Â:: ";
+			cout << "ì‚¬ì› ì´ë¦„ ì…ë ¥:: ";
 			cin >> ename;
-			cout << "»ç¿ø ±Ş¿©:: ";
+			cout << "ì‚¬ì› ê¸‰ì—¬:: ";
 			cin >> pay;
 			data = new Employee(eno, ename, pay);
 			la.Add(data);
 			break;
 		case Add1:
-			cout << "»ç¿ø¹øÈ£ ÀÔ·Â:: ";
+			cout << "ì‚¬ì›ë²ˆí˜¸ ì…ë ¥:: ";
 			cin >> eno;
-			cout << "»ç¿ø ÀÌ¸§ ÀÔ·Â:: ";
+			cout << "ì‚¬ì› ì´ë¦„ ì…ë ¥:: ";
 			cin >> ename;
-			cout << "»ç¿ø ±Ş¿©:: ";
+			cout << "ì‚¬ì› ê¸‰ì—¬:: ";
 			cin >> pay;
 			data = new Employee(eno, ename, pay);
 			lb.Add(data);
 			break;
 		case Delete:
-			cout << "»ç¿ø¹øÈ£ ÀÔ·Â:: ";
+			cout << "ì‚¬ì›ë²ˆí˜¸ ì…ë ¥:: ";
 			cin >> eno;
 			result = la.Delete(eno);
 			if (result)
-				cout << "eno = " << eno << " »èÁ¦ ¿Ï·á." << endl;
+				cout << "eno = " << eno << " ì‚­ì œ ì™„ë£Œ." << endl;
 			break;
 		case Show:
-			cout << "¸®½ºÆ® la: " << endl;
+			cout << "ë¦¬ìŠ¤íŠ¸ la: " << endl;
 			la.Show();
-			cout << "¸®½ºÆ® lb: " << endl;
+			cout << "ë¦¬ìŠ¤íŠ¸ lb: " << endl;
 			lb.Show();
 			break;
 		case Search:
-			cout << "»ç¿ø¹øÈ£ ÀÔ·Â:: ";
+			cout << "ì‚¬ì›ë²ˆí˜¸ ì…ë ¥:: ";
 			cin >> eno;
 			result = la.Search(eno);
 			if (!result)
-				cout << "°Ë»ö °ª = " << eno << " µ¥ÀÌÅÍ°¡ ¾ø½À´Ï´Ù." << endl;
+				cout << "ê²€ìƒ‰ ê°’ = " << eno << " ë°ì´í„°ê°€ ì—†ìŠµë‹ˆë‹¤." << endl;
 			else
-				cout << "°Ë»ö °ª = " << eno << " µ¥ÀÌÅÍ°¡ Á¸ÀçÇÕ´Ï´Ù." << endl;
+				cout << "ê²€ìƒ‰ ê°’ = " << eno << " ë°ì´í„°ê°€ ì¡´ì¬í•©ë‹ˆë‹¤." << endl;
 			break;
 		case Merge:
 			lc = la + lb;
-			cout << "¸®½ºÆ® lc: " << endl;
+			cout << "ë¦¬ìŠ¤íŠ¸ lc: " << endl;
 			lc.Show();
-			cout << "¸®½ºÆ® la¸¦ »èÁ¦" << endl;
+			cout << "ë¦¬ìŠ¤íŠ¸ laë¥¼ ì‚­ì œ" << endl;
 			la.Erase();
-			cout << "¸®½ºÆ® lb¸¦ »èÁ¦" << endl;
+			cout << "ë¦¬ìŠ¤íŠ¸ lbë¥¼ ì‚­ì œ" << endl;
 			lb.Erase();
-			cout << "¸®½ºÆ® la: " << endl;
+			cout << "ë¦¬ìŠ¤íŠ¸ la: " << endl;
 			la.Show();
-			cout << endl << "¸®½ºÆ® lb: " << endl;
+			cout << endl << "ë¦¬ìŠ¤íŠ¸ lb: " << endl;
 			lb.Show();
 			break;
 		case SUM:  cout << "sum() = " << sum(la) << endl; break;
 		case AVG:  cout << "avg() = " << avg(la) << endl; break;
 		case MIN:  cout << "min() = " << min(la) << endl; break;
 		case MAX:  cout << "max() = " << max(la) << endl; break;
-		case Exit: // ²¿¸® ³ëµå »èÁ¦
+		case Exit: // ê¼¬ë¦¬ ë…¸ë“œ ì‚­ì œ
 			break;
 		}
 	} while (static_cast<Enum>(selectMenu) != Exit);
