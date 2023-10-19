@@ -1,4 +1,4 @@
-/*
+﻿/*
 6단계- 원형 객체 연결 리스트의 available list, getNode, retNode
 head node를 갖고 있고 삭제된 노드들은 available list에 리턴한다.
 CircularList를 대상으로 한 iterator를 구현한다.
@@ -195,9 +195,11 @@ bool CircularList::Delete(string eno) { // delete the element
 	return false;
 }
 void CircularList::Erase() {
-	first->link = av;
-	first = new Node();
+	Node* first = last->link;
+	last->link = av;
+	av = first->link;
 	first->link = first;
+	last = first;
 }
 CircularList& CircularList::operator+(CircularList& lb) {
 	Employee* p, * q;
