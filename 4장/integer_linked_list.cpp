@@ -1,5 +1,5 @@
 /*
-1´Ü°è-Á¤¼ö ¿¬°á ¸®½ºÆ®: ´Ü¼øÇÑ linked list¿¡¼­ add, deleteÇÏ´Â ¾Ë°í¸®ÁòÀ» ÄÚµù
+1ë‹¨ê³„-ì •ìˆ˜ ì—°ê²° ë¦¬ìŠ¤íŠ¸: ë‹¨ìˆœí•œ linked listì—ì„œ add, deleteí•˜ëŠ” ì•Œê³ ë¦¬ì¦˜ì„ ì½”ë”©
 */
 #include <iostream>
 #include <time.h>
@@ -24,11 +24,11 @@ public:
 	}
 	bool Delete(int);
 	void Show();
-	void Add(int element);//Á¤·ÄµÇµµ·Ï ±¸Çö
+	void Add(int element);//ì •ë ¬ë˜ë„ë¡ êµ¬í˜„
 	bool Search(int data);
 	LinkedList& operator+(LinkedList&);
 };
-void LinkedList::Show() { // ÀüÃ¼ ¸®½ºÆ®¸¦ ¼ø¼­´ë·Î Ãâ·ÂÇÑ´Ù.
+void LinkedList::Show() { // ì „ì²´ ë¦¬ìŠ¤íŠ¸ë¥¼ ìˆœì„œëŒ€ë¡œ ì¶œë ¥í•œë‹¤.
 	Node* p = first;
 	if (p == nullptr) {
 		cout << "Empty List" << endl;
@@ -42,15 +42,15 @@ void LinkedList::Show() { // ÀüÃ¼ ¸®½ºÆ®¸¦ ¼ø¼­´ë·Î Ãâ·ÂÇÑ´Ù.
 	return;
 }
 
-void LinkedList::Add(int element) // ÀÓÀÇ °ªÀ» »ğÀÔÇÒ ¶§ ¸®½ºÆ®°¡ ¿À¸§Â÷¼øÀ¸·Î Á¤·ÄÀÌ µÇµµ·Ï ÇÑ´Ù
+void LinkedList::Add(int element) // ì„ì˜ ê°’ì„ ì‚½ì…í•  ë•Œ ë¦¬ìŠ¤íŠ¸ê°€ ì˜¤ë¦„ì°¨ìˆœìœ¼ë¡œ ì •ë ¬ì´ ë˜ë„ë¡ í•œë‹¤
 {
 	Node* newNode = new Node(element);
 	Node* p = first, * q = nullptr;
-	if (p == nullptr) { //¿¬°á ¸®½ºÆ®°¡ ºñ¾îÀÖ´Â °æ¿ì
+	if (p == nullptr) { //ì—°ê²° ë¦¬ìŠ¤íŠ¸ê°€ ë¹„ì–´ìˆëŠ” ê²½ìš°
 		first = newNode;
 		return;
 	}
-	if (newNode->data < p->data) { //¸Ç ¾Õ¿¡ »õ ³ëµå¸¦ Ãß°¡ÇÏ´Â °æ¿ì
+	if (newNode->data < p->data) { //ë§¨ ì•ì— ìƒˆ ë…¸ë“œë¥¼ ì¶”ê°€í•˜ëŠ” ê²½ìš°
 		newNode->link = p;
 		first = newNode;
 		return;
@@ -64,7 +64,7 @@ void LinkedList::Add(int element) // ÀÓÀÇ °ªÀ» »ğÀÔÇÒ ¶§ ¸®½ºÆ®°¡ ¿À¸§Â÷¼øÀ¸·Î Á
 		q = p;
 		p = p->link;
 	}
-	//¸Ç ³¡¿¡ »õ ³ëµå¸¦ Ãß°¡ÇÏ´Â °æ¿ì
+	//ë§¨ ëì— ìƒˆ ë…¸ë“œë¥¼ ì¶”ê°€í•˜ëŠ” ê²½ìš°
 	q->link = newNode;
 	return;
 }
@@ -84,7 +84,7 @@ bool LinkedList::Delete(int element) // delete the element
 	Node* p = first, * q = nullptr;
 	while (p != nullptr) {
 		if (p->data == element) {
-			if (p == first) { //Áö¿ö¾ß ÇÏ´Â ³ëµå°¡ firstÀÎ °æ¿ì
+			if (p == first) { //ì§€ì›Œì•¼ í•˜ëŠ” ë…¸ë“œê°€ firstì¸ ê²½ìš°
 				first = p->link;
 				delete p;
 				return true;
@@ -96,7 +96,7 @@ bool LinkedList::Delete(int element) // delete the element
 		q = p;
 		p = p->link;
 	}
-	return true;
+	return false;
 }
 
 LinkedList& LinkedList::operator+(LinkedList& lb) {
@@ -127,14 +127,14 @@ enum Enum {
 	Add1, Add2, Delete, Show, Search, Merge, Exit
 };
 void main() {
-	Enum menu; // ¸Ş´º
+	Enum menu; // ë©”ë‰´
 	int selectMenu;
 	int num = 0; bool result = false;
 	srand(time(NULL));
 	LinkedList la, lb, lc;
 	int data = 0;
 	do {
-		cout << "0.Add0, 1. Add1, 2.Delete, 3.Show, 4.Search, 5. Merge, 6. Exit" << endl << "¼±ÅÃ::";
+		cout << "0.Add0, 1. Add1, 2.Delete, 3.Show, 4.Search, 5. Merge, 6. Exit" << endl << "ì„ íƒ::";
 		cin >> selectMenu;
 		switch (static_cast<Enum>(selectMenu)) {
 		case Add1:
@@ -149,25 +149,25 @@ void main() {
 			cin >> data;
 			result = la.Delete(data);
 			if (result)
-				cout << "»èÁ¦ ¿Ï·á" << endl;
+				cout << "ì‚­ì œ ì™„ë£Œ" << endl;
 			break;
 		case Show:
-			cout << "¸®½ºÆ® la = ";
+			cout << "ë¦¬ìŠ¤íŠ¸ la = ";
 			la.Show();
-			cout << "¸®½ºÆ® lb = ";
+			cout << "ë¦¬ìŠ¤íŠ¸ lb = ";
 			lb.Show();
 			break;
-		case Search: // È¸¿ø ¹øÈ£ °Ë»ö
+		case Search: // íšŒì› ë²ˆí˜¸ ê²€ìƒ‰
 			int n; cin >> n;
 			result = la.Search(n);
 			if (!result)
-				cout << "°Ë»ö °ª = " << n << " µ¥ÀÌÅÍ°¡ ¾ø½À´Ï´Ù." << endl;
+				cout << "ê²€ìƒ‰ ê°’ = " << n << " ë°ì´í„°ê°€ ì—†ìŠµë‹ˆë‹¤." << endl;
 			else
-				cout << "°Ë»ö °ª = " << n << " µ¥ÀÌÅÍ°¡ Á¸ÀçÇÕ´Ï´Ù." << endl;
+				cout << "ê²€ìƒ‰ ê°’ = " << n << " ë°ì´í„°ê°€ ì¡´ì¬í•©ë‹ˆë‹¤." << endl;
 			break;
 		case Merge:
 			lc = la + lb;
-			cout << "¸®½ºÆ® lc = ";
+			cout << "ë¦¬ìŠ¤íŠ¸ lc = ";
 			lc.Show();
 			break;
 		case Exit:
