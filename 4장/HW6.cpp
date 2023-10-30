@@ -5,7 +5,6 @@ head node를 갖고 있고 삭제된 노드들은 available list에 리턴한다.
 CircularDoublyList를 대상으로 한 iterator를 구현한다.
 */
 #include <iostream>
-#include <time.h>
 #include <string>
 using namespace std;
 template<class T> class DoublyListNode;
@@ -32,7 +31,7 @@ public:
 	}
 };
 ostream& operator<<(ostream& os, Employee& emp) {
-	os << "No: " << emp.eno << " Name: " << emp.ename << " Salary: " << emp.salary << endl;
+	os << "사원번호: " << emp.eno << " 이름: " << emp.ename << " 월급: " << emp.salary << endl;
 	return os;
 }
 bool Employee::operator==(Employee& emp) {
@@ -109,7 +108,7 @@ private:
 template<class T>
 class CircularDoublyListIterator {
 public:
-	CircularDoublyListIterator(const CircularDoublyList<T>& l) : list(l), currnet(l.first->link) { }
+	CircularDoublyListIterator(const CircularDoublyList<T>& l) : list(l), current(list.last->rlink->rlink) {}
 	~CircularDoublyListIterator();
 	bool NotNull();
 	bool NextNotNull();
@@ -127,18 +126,25 @@ DoublyListNode<T>* CircularDoublyList<T>::GetNode()
 	if (av != NULL) {
 		n = av;
 		av = av->rlink;
-		return n;
+		n->rlink = n->llink = n;
 	}
-	n = new DoublyListNode<T>();
+	else
+		n = new DoublyListNode<T>();
 	return n;
 }
 template<class T>
 void CircularDoublyList<T>::RetNode(DoublyListNode<T>* x)
 { //free the node pointed to by x
-	x->rlink = av;
-	av->llink = x;
-	av = x;
-	x = 0;
+	if (av == NULL) {
+		av = x;
+		x->rlink = x->llink = NULL;
+	}
+	else {
+		x->rlink = av;
+		x->llink = NULL;
+		av->llink = x;
+		av = x;
+	}
 }
 template<class T>
 void CircularDoublyList<T>::Show() { // 전체 리스트를 순서대로 출력한다.
@@ -154,42 +160,86 @@ void CircularDoublyList<T>::Add(T* element) // 임의 값을 삽입할 때 리스트가 오름
 {
 	DoublyListNode<T>* newNode = GetNode(); newNode->data = *element;
 	DoublyListNode<T>* first = last->rlink;
-	DoublyListNode<T>* p = first->rlink, * q = first;
+	DoublyListNode<T>* p = first->rlink;
 	while (p != first) {
 		if (newNode->data < p->data) {
+			p->llink->rlink = newNode;
+			newNode->llink = p->llink;
 			newNode->rlink = p;
-			newNode->llink = q;
 			p->llink = newNode;
-			q->rlink = newNode;
+			return;
 		}
-		q = p;
 		p = p->rlink;
 	}
+	p->llink->rlink = newNode;
+	newNode->rlink = first;
+	newNode->llink = p->llink;
+	first->llink = newNode;
+	last = newNode;
+	return;
 }
 template<class T>
 bool CircularDoublyList<T>::Search(string eno) { // sno를 갖는 레코드를 찾기
 	DoublyListNode<T>* first = last->rlink;
 	DoublyListNode<T>* p = first->rlink;
 	while (p != first) {
-		if (p->data.eno)
+		if (p->data.eno == eno)
+			return true;
+		p = p->rlink;
 	}
+	return false;
 }
 template<class T>
 bool CircularDoublyList<T>::Delete(string eno) // delete the element
 {
 	DoublyListNode<T>* first = last->rlink;
 	DoublyListNode<T>* p = first->rlink;
-
+	while (p != first) {
+		if (p->data.eno == eno) {
+			if (p == last)
+				last = p->llink;
+			p->llink->rlink = p->rlink;
+			p->rlink->llink = p->llink;
+			RetNode(p);
+			return true;
+		}
+		p = p->rlink;
+	}
+	return false;
 }
 template<class T>
 void CircularDoublyList<T>::Erase() {
-
+	DoublyListNode<T>* first = last->rlink;
+	if (av == NULL) {
+		av = first->rlink;
+		last->rlink = NULL;
+		av->llink = NULL;
+		first->rlink = first->llink = first;
+		last = first;
+	}
+	else {
+		last->rlink = av;
+		av->llink = last;
+		av = first->rlink;
+		av->llink = NULL;
+		first->rlink = first->llink = first;
+		last = first;
+	}
 }
 
 template<class T>
 ostream& operator<<(ostream& os, CircularDoublyList<T>& l)
 {
-
+	CircularDoublyListIterator<T> li(l);
+	if (!li.NotNull()) {
+		os << "Empty List" << endl;
+		return os;
+	}
+	while (li.NotNull()) {
+		os << li.GetCurrent() << endl;
+		li.Next();
+	}
+	return os;
 }
 template<class T>
 CircularDoublyList<T>& CircularDoublyList<T>::operator+(CircularDoublyList<T>& lb) {
@@ -197,28 +247,56 @@ CircularDoublyList<T>& CircularDoublyList<T>::operator+(CircularDoublyList<T>& l
 	CircularDoublyListIterator<T> Aiter(*this); CircularDoublyListIterator<T> Biter(lb);
 	CircularDoublyList<T> lc;
 	p = Aiter.First(); q = Biter.First();
-
+	if (!Aiter.NotNull())
+	while (Aiter.NotNull() && Biter.NotNull()) {
+		switch (p->compare(q)) {
+		case '<':
+			lc.Add(p);
+			p = Aiter.Next();
+			break;
+		case '>':
+			lc.Add(q);
+			q = Biter.Next();
+			break;
+		case '=':
+			lc.Add(p);
+			p = Aiter.Next();
+			q = Biter.Next();
+			break;
+		}
+	}
+	while (Aiter.NotNull()) {
+		lc.Add(p);
+		p = Aiter.Next();
+	}
+	while (Biter.NotNull()) {
+		lc.Add(q);
+		q = Biter.Next();
+	}
+	return lc;
 }
 
 template<class T>
 bool CircularDoublyListIterator<T>::NotNull() {
-
+	return current != list.last->rlink;
 }
 template<class T>
 bool CircularDoublyListIterator<T>::NextNotNull() {
-
+	return current->rlink != list.last->rlink;
 }
 template<class T>
 T* CircularDoublyListIterator<T>::First() {
-
+	current = list.last->rlink->rlink;
+	return &current->data;
 }
 template<class T>
 T* CircularDoublyListIterator<T>::Next() {
-
+	current = current->rlink;
+	return &current->data;
 }
 template<class T>
 T* CircularDoublyListIterator<T>::GetCurrent() {
-
+	return &current->data;
 }
 template<class T>
 CircularDoublyListIterator<T>::~CircularDoublyListIterator() {
@@ -229,22 +307,50 @@ CircularDoublyListIterator<T>::~CircularDoublyListIterator() {
 template<class T>
 int sum(const CircularDoublyList<T>& l)
 {
-
+	CircularDoublyListIterator<T> li(l);
+	int ret = 0;
+	while (li.NotNull()) {
+		ret += li.GetCurrent()->getSalary();
+		li.Next();
+	}
+	return ret;
 }
 template<class T>
 double avg(const CircularDoublyList<T>& l)
 {
-
+	CircularDoublyListIterator<T> li(l);
+	int sum = 0, n = 0;
+	while (li.NotNull()) {
+		sum += li.GetCurrent()->getSalary();
+		n++;
+		li.Next();
+	}
+	double ret = (double)sum / (double)n;
+	return ret;
 }
 template<class T>
 int min(const CircularDoublyList<T>& l)
 {
-
+	CircularDoublyListIterator<T> li(l);
+	int ret = 987654321;
+	while (li.NotNull()) {
+		int sal = li.GetCurrent()->getSalary();
+		ret = min(ret, sal);
+		li.Next();
+	}
+	return ret;
 }
 template<class T>
 int max(const CircularDoublyList<T>& l)
 {
-
+	CircularDoublyListIterator<T> li(l);
+	int ret = 0;
+	while (li.NotNull()) {
+		int sal = li.GetCurrent()->getSalary();
+		ret = max(ret, sal);
+		li.Next();
+	}
+	return ret;
 }
 
 enum Enum {
