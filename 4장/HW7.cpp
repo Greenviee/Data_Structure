@@ -6,7 +6,7 @@
 - singly linked list, circular linked list, circular linked list with head node
 */
 #include <iostream>
-#include<string>
+#include <string>
 #include <assert.h>
 using namespace std;
 
