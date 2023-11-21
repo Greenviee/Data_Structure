@@ -1,13 +1,13 @@
-//ì†ŒìŠ¤ì½”ë“œ 5.3: Threaded Tree
+//¼Ò½ºÄÚµå 5.3: Threaded Tree
 
 
 //Tree 5.13 Threaded binary tree
 /*
-1. template versionìœ¼ë¡œ Employee ê°ì²´ë¥¼ ë…¸ë“œì— ì €ì¥
-2. tree iteratorë¥¼ ì‚¬ìš©í•˜ì—¬ sumì„ êµ¬í•œë‹¤
-3. mainì—ì„œ Insert, Remove, Inorder, IteratorInorder, Search, PrintTreeëŠ” Employeeì— ëŒ€í•˜ì—¬ êµ¬í˜„í•œë‹¤
-4. Employee ê°ì²´ëŠ” í™”ë©´ì—ì„œ ì…ë ¥í•˜ì§€ ì•Šê³  10ê°œì˜ ê°ì²´ë¥¼ ë°°ì—´ë¡œ ì´ˆê¸°í™” forë¬¸ìœ¼ë¡œ ì…ë ¥í•œë‹¤.
-5. mainì—ì„œ InsertStudent, InorderStudentëŠ” Studentì— ëŒ€í•˜ì—¬ êµ¬í˜„í•œë‹¤.
+1. template versionÀ¸·Î Employee °´Ã¼¸¦ ³ëµå¿¡ ÀúÀå
+2. tree iterator¸¦ »ç¿ëÇÏ¿© sumÀ» ±¸ÇÑ´Ù
+3. main¿¡¼­ Insert, Remove, Inorder, IteratorInorder, Search, PrintTree´Â Employee¿¡ ´ëÇÏ¿© ±¸ÇöÇÑ´Ù
+4. Employee °´Ã¼´Â È­¸é¿¡¼­ ÀÔ·ÂÇÏÁö ¾Ê°í 10°³ÀÇ °´Ã¼¸¦ ¹è¿­·Î ÃÊ±âÈ­ for¹®À¸·Î ÀÔ·ÂÇÑ´Ù.
+5. main¿¡¼­ InsertStudent, InorderStudent´Â Student¿¡ ´ëÇÏ¿© ±¸ÇöÇÑ´Ù.
 */
 #include <iostream>
 #include <cstdlib>
@@ -26,6 +26,7 @@ class Employee {
 public:
 	Employee() {}
 	Employee(string sno, string sname) :eno(sno), ename(sname) { salary = rand() % 10000; }
+	Employee(string sno, string sname, int salary) :eno(sno), ename(sname), salary(salary) {}
 	friend ostream& operator<<(ostream& os, Employee&);
 	bool operator<(Employee&);
 	bool operator>(Employee&);
@@ -36,7 +37,7 @@ public:
 	}
 };
 ostream& operator<<(ostream& os, Employee& emp) {
-	os << "ì‚¬ì›ë²ˆí˜¸: " << emp.eno << " ì´ë¦„: " << emp.ename << " ì›”ê¸‰: " << emp.salary << endl;;
+	os << "»ç¿ø¹øÈ£: " << emp.eno << " ÀÌ¸§: " << emp.ename << " ¿ù±Ş: " << emp.salary << endl;;
 	return os;
 }
 bool Employee::operator==(Employee& emp) {
@@ -73,7 +74,7 @@ public:
 	bool operator==(Student&);
 };
 ostream& operator<<(ostream& os, Student& emp) {
-	os << "ë²ˆí˜¸: " << emp.snum << " ì´ë¦„: " << emp.sname << endl;
+	os << "¹øÈ£: " << emp.snum << " ÀÌ¸§: " << emp.sname << endl;
 	return os;
 }
 bool Student::operator==(Student& emp) {
@@ -101,8 +102,14 @@ private:
 	ThreadedNode* RightChild;
 	bool RightThread;
 public:
-	ThreadedNode() { LeftChild = RightChild = 0; };
-	ThreadedNode(T ch) { data = ch; };
+	ThreadedNode() { 
+		LeftChild = RightChild = 0;
+		LeftThread = RightThread = true;
+	}
+	ThreadedNode(T ch) { 
+		data = ch;
+		LeftThread = RightThread = true;
+	}
 	ThreadedNode(T ch, ThreadedNode* lefty, ThreadedNode* righty,
 		bool lthread, bool rthread)
 	{
@@ -122,7 +129,7 @@ public:
 		root = new ThreadedNode<T>;
 		root->RightChild = root->LeftChild = root;
 		root->data = T();
-		root->LeftThread = false; root->RightThread = true;
+		root->LeftThread = true; root->RightThread = false;
 	};
 	void InsertRight(ThreadedNode<T>*, T);
 	bool Insert(T data);
@@ -169,7 +176,6 @@ bool ThreadedTree<T>::Delete(T data)
 	{
 		if (dest->data < data)
 		{
-			cout << "right" << endl;
 			/* not found */
 			if (dest->RightThread)
 				return false;
@@ -178,7 +184,6 @@ bool ThreadedTree<T>::Delete(T data)
 		}
 		else if (dest->data > data)
 		{
-			cout << "left" << endl;
 			/* not found */
 			if (dest->LeftThread)
 				return false;
@@ -187,7 +192,6 @@ bool ThreadedTree<T>::Delete(T data)
 		}
 		else
 		{
-			cout << "find" << endl;
 			/* found */
 			break;
 		}
@@ -275,14 +279,13 @@ void ThreadedTree<T>::Inorder(ThreadedNode<T>* CurrentNode, bool b)
 {
 	if (!b) {
 		Inorder(CurrentNode->LeftChild, CurrentNode->LeftThread);
-		cout << " " << CurrentNode->data;
-		cout << "Inorder:" << "rightthread=" << CurrentNode->RightThread;
+		if (CurrentNode->RightChild != CurrentNode) cout << " " << CurrentNode->data;
 		if (CurrentNode->RightChild != root) Inorder(CurrentNode->RightChild, CurrentNode->RightThread);
 	}
 }
 
 template <class T>
-bool ThreadedTree<T>::Insert(T d)//leaf nodeì—ë§Œ insert, ì¤‘ê°„ ë…¸ë“œì— insert ì•„ë‹˜
+bool ThreadedTree<T>::Insert(T d)//leaf node¿¡¸¸ insert, Áß°£ ³ëµå¿¡ insert ¾Æ´Ô
 {
 	ThreadedNode<T>* p = root;
 	ThreadedNode<T>* q = p;
@@ -290,24 +293,34 @@ bool ThreadedTree<T>::Insert(T d)//leaf nodeì—ë§Œ insert, ì¤‘ê°„ ë…¸ë“œì— inse
 	while (!temp) {
 		q = p;
 		if (d == p->data) return false;
-		if (d < p->data) { temp = p->LeftThread; p = p->LeftChild; }
+		if (q->RightChild == q || d < p->data) { 
+			temp = p->LeftThread;
+			p = p->LeftChild; 
+		}
 		else { temp = p->RightThread; p = p->RightChild; }
 	}
 	p = new ThreadedNode<T>;
 	p->data = d;
-	//	if (q->LeftChild == q){ q->LeftChild = p;q->LeftThread = false;}
-	//	else
-	if (d < q->data)
-	{
-		p->RightChild = q; p->RightThread = true;
-		p->LeftChild = q->LeftChild; p->LeftThread = q->LeftThread;
-		q->LeftChild = p; q->LeftThread = false;
+	
+	if (q->LeftChild == q){ 
+		q->LeftChild = p;
+		q->LeftThread = false;
+		p->RightChild = p->LeftChild = q;
 	}
-	else
-	{
-		p->RightChild = q->RightChild; p->RightThread = q->RightThread;
-		p->LeftChild = q; p->LeftThread = true;
-		q->RightChild = p; q->RightThread = false;
+	else {
+		
+		if (d < q->data)
+		{
+			p->RightChild = q; p->RightThread = true;
+			p->LeftChild = q->LeftChild; p->LeftThread = q->LeftThread;
+			q->LeftChild = p; q->LeftThread = false;
+		}
+		else
+		{
+			p->RightChild = q->RightChild; p->RightThread = q->RightThread;
+			p->LeftChild = q; p->LeftThread = true;
+			q->RightChild = p; q->RightThread = false;
+		}
 	}
 	return true;
 }
@@ -387,7 +400,7 @@ template <class T>
 void ThreadedInorderIterator<T>::Inorder()
 {
 	for (T* ch = Next(); ch; ch = Next())
-		cout << *ch << endl;
+		cout << *ch;
 }
 
 template <class T>
@@ -422,6 +435,7 @@ int main() {
 		cin >> select;
 		int rnd = 0;
 		string eno, ename;
+		int salary;
 		switch (static_cast<Enum>(select))
 		{
 		case Insert:
@@ -431,25 +445,27 @@ int main() {
 				Employee* e = new Employee(to_string(i), "A");
 				emp[i] = *e;
 			}
-			//ê°ì²´ ë°°ì—´ ì´ˆê¸°í™”í•˜ì—¬ ì…ë ¥
+			//°´Ã¼ ¹è¿­ ÃÊ±âÈ­ÇÏ¿© ÀÔ·Â
 			for (int i = 0; i < 10; i++) {
 				te.Insert(emp[i]);
 			}
 			break;
 		}
 		case Remove:
-			cout << "ì‚­ì œ ì‚¬ì›ë²ˆí˜¸ ì…ë ¥:: ";
+			cout << "»èÁ¦ »ç¿ø¹øÈ£ ÀÔ·Â:: ";
 			cin >> eno;
-			cout << "ì‚½ì… ì‚¬ì› ì´ë¦„ ì…ë ¥:: ";
+			cout << "»ğÀÔ »ç¿ø ÀÌ¸§ ÀÔ·Â:: ";
 			cin >> ename;
-			edata = new Employee(eno, ename);
+			cout << "»èÁ¦ »ç¿ø ±Ş¿© ÀÔ·Â:: ";
+			cin >> salary;
+			edata = new Employee(eno, ename, salary);
 			/*
-			data = new Employee(eno, nullptr);//ì˜¤ë¥˜ê°€ ë‚˜ëŠ” ì´ìœ ëŠ” nullptrì€ í¬ì¸í„° íƒ€ì…ì¸ë° stringìœ¼ë¡œ ë³€í™˜í•  ìˆ˜ê°€ ì—†ê¸° ë•Œë¬¸ì„
+			data = new Employee(eno, nullptr);//¿À·ù°¡ ³ª´Â ÀÌÀ¯´Â nullptrÀº Æ÷ÀÎÅÍ Å¸ÀÔÀÎµ¥ stringÀ¸·Î º¯È¯ÇÒ ¼ö°¡ ¾ø±â ¶§¹®ÀÓ
 			*/
 			if (te.Delete(*edata))
-				cout << "ì‚­ì œ ì„±ê³µ" << endl;
+				cout << "»èÁ¦ ¼º°ø" << endl;
 			else
-				cout << "ì‚­ì œ ì‹¤íŒ¨" << endl;
+				cout << "»èÁ¦ ½ÇÆĞ" << endl;
 			break;
 		case Inorder:
 			cout << "Recursive Inorder" << endl;
@@ -460,15 +476,15 @@ int main() {
 			ti.Inorder();
 			break;
 		case Search:
-			cout << "ê²€ìƒ‰ ì‚¬ì›ë²ˆí˜¸ ì…ë ¥:: ";
+			cout << "°Ë»ö »ç¿ø¹øÈ£ ÀÔ·Â:: ";
 			cin >> eno;
-			cout << "ì‚½ì… ì‚¬ì› ì´ë¦„ ì…ë ¥:: ";
+			cout << "»ğÀÔ »ç¿ø ÀÌ¸§ ÀÔ·Â:: ";
 			cin >> ename;
 			edata = new Employee(eno, ename);
-			if (te.Search(*edata))//ì…ë ¥ëœ xì— ëŒ€í•œ tree ë…¸ë“œë¥¼ ì°¾ì•„ ì‚­ì œí•œë‹¤.
-				cout << eno << " ê°’ì´ ì¡´ì¬í•œë‹¤" << endl;
+			if (te.Search(*edata))//ÀÔ·ÂµÈ x¿¡ ´ëÇÑ tree ³ëµå¸¦ Ã£¾Æ »èÁ¦ÇÑ´Ù.
+				cout << eno << " °ªÀÌ Á¸ÀçÇÑ´Ù" << endl;
 			else
-				cout << "ê°’ì´ ì—†ë‹¤" << endl;
+				cout << "°ªÀÌ ¾ø´Ù" << endl;
 
 			break;
 		case PrintTree:
@@ -476,15 +492,15 @@ int main() {
 			te.PrintTree();
 			break;
 		case Sum:
-			//iteratorë¥¼ ì‚¬ìš©í•œ êµ¬í˜„ : ëª¨ë“  ë…¸ë“œì˜ salaryë¥¼ í•©í•œë‹¤
+			//iterator¸¦ »ç¿ëÇÑ ±¸Çö : ¸ğµç ³ëµåÀÇ salary¸¦ ÇÕÇÑ´Ù
 			cout << "Sum: " << ti.Sum() << endl;
 			break;
 		case InsertStudent:
 		{
-			//ê°ì²´ ë°°ì—´ ì´ˆê¸°í™”í•˜ì—¬ ì…ë ¥
+			//°´Ã¼ ¹è¿­ ÃÊ±âÈ­ÇÏ¿© ÀÔ·Â
 			Student smp[11];
 			for (int i = 0; i < 10; i++) {
-				Student* s = new Student("test", to_string(i));
+				Student* s = new Student(to_string(i), to_string(rand() % 100));
 				smp[i] = *s;
 			}
 			for (int i = 0; i < 10; i++) {
@@ -493,7 +509,7 @@ int main() {
 			break;
 		}
 		case InorderStudent:
-			//ì¶œë ¥
+			//Ãâ·Â
 			cout << "Recursive Inorder" << endl;
 			ts.Inorder();
 			break;
