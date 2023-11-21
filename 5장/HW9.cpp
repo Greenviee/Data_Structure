@@ -3,6 +3,7 @@
 4. split -> 트리를 분리해서 depth를 줄이는 알고리즘 
 Height(Tl) - Height(Tr) : 왼쪽 서브트리 높이 - 오른쪽 서브트리 높이 
 LL타입 : leftnode가 2개 연결  
+LR, RL -> AVL트리 참조 
 */
 #include <iostream>
 #define MaxCapacity 20
