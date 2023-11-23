@@ -62,6 +62,10 @@ public:
 	void rank() {
 		rank(root);
 	}
+	void depth() {
+		depth(root);
+	}
+	
 	int search(int rank);//nth 작은 값을 찾는다 
 	// Driver
 	int operator==(const Tree& t)
@@ -79,6 +83,16 @@ private:
 };
 int Tree::rank(TreeNode* current) {
 	//leftsize 갱신 -> 재귀0 
+	if (current == nullptr) return 0;
+	Leftsize = 1 + rank(current->LeftChild);
+	return LeftSize;
+}
+int Tree::depth(TreeNode* p) {
+	if (p == nullptr) return 0;
+	int lnum = 1 + depth(p->LeftChild);
+	int rnum = 1 + depth(p->RightChild);
+	height = lnum -rnum;
+	
 }
 TreeNode* Tree::inorderSucc(TreeNode* current)
 {
@@ -220,6 +234,15 @@ int main() {
 			cout << x << " 번째 순위 값은 " << rankNumber << endl;
 
 			break;
+		case Height:
+			t.depth();
+			t.inorder();
+			break;
+		case SplitJion:
+			cin >> x;
+			split(x, A, B, y);
+			Tree tx = ThreeWayJoin(A, x, B);
+			tx.inorder();
 		case Copy:
 			eq = (t == Tree(t));//copy constructor를 호출
 			if (eq) {
