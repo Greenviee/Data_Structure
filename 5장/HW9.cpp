@@ -20,7 +20,10 @@ private:
 
 public:
 	TreeNode() {
-		LeftChild = RightChild = NULL; leftSize = 0;
+		LeftChild = RightChild = NULL; leftSize = 0; height = 0;
+	}
+	TreeNode(int x) : data(x) {
+		LeftChild = RightChild = NULL; leftSize = 0; height = 0;
 	}
 	bool equals(TreeNode& x) {
 		if (this->data == x.data)
@@ -42,7 +45,7 @@ public:
 	Tree() {
 		root = NULL;
 	}
-	Tree::Tree(const Tree& s)//copy constructor
+	Tree(const Tree& s)//copy constructor
 	{
 		root = copy(s.root);
 	}
@@ -62,9 +65,7 @@ public:
 	void rank() {
 		rank(root);
 	}
-	void depth() {
-		depth(root);
-	}
+	int GetBalance(TreeNode*);
 	
 	int search(int rank);//nth 작은 값을 찾는다 
 	// Driver
@@ -72,6 +73,15 @@ public:
 	{
 		return equal(this->root, t.root);
 	}
+	int GetHeight(TreeNode*);
+	TreeNode* Rotate_LL(TreeNode*);
+	TreeNode* Rotate_LR(TreeNode*);
+	TreeNode* Rotate_RL(TreeNode*);
+	TreeNode* Rotate_RR(TreeNode*);
+	TreeNode* Rebalance(TreeNode*);
+
+	int Split(int i, Tree& B, Tree& C, int x);
+	Tree* ThreeWayJoin(Tree* A, int x, Tree* B);
 private:
 	TreeNode* root;
 	void inorder(TreeNode* CurrentNode);
@@ -80,20 +90,33 @@ private:
 	TreeNode* copy(TreeNode* orignode);
 	int equal(TreeNode* a, TreeNode* b);
 	int rank(TreeNode*);
+	int depth(TreeNode*);
 };
 int Tree::rank(TreeNode* current) {
 	//leftsize 갱신 -> 재귀0 
 	if (current == nullptr) return 0;
-	Leftsize = 1 + rank(current->LeftChild);
-	return LeftSize;
+	current->leftSize = 1 + rank(current->LeftChild);
+	TreeNode* p = current->LeftChild->RightChild;
+	while (p != nullptr) {
+		current->leftSize += rank(p);
+		p = p->RightChild;
+	}
+	return current->leftSize;
 }
-int Tree::depth(TreeNode* p) {
+
+int Tree::GetHeight(TreeNode* p) {
 	if (p == nullptr) return 0;
-	int lnum = 1 + depth(p->LeftChild);
-	int rnum = 1 + depth(p->RightChild);
-	height = lnum -rnum;
-	
+	int hl = 1 + GetHeight(p->LeftChild);
+	int hr = 1 + GetHeight(p->RightChild);
+	return max(hl, hr);
 }
+
+int Tree::GetBalance(TreeNode* p) {
+	if (p == nullptr) return 0;
+	p->height = GetHeight(p->LeftChild) - GetHeight(p->RightChild);
+	return p->height;
+}
+
 TreeNode* Tree::inorderSucc(TreeNode* current)
 {
 	TreeNode* temp = current->RightChild;
@@ -168,20 +191,92 @@ bool Tree::insert(int x) {// binary search tree를 만드는 입력 => A + B * C을 tre
 							// 설계하여 구현
 	TreeNode* p = root;
 	TreeNode* q = NULL;
-
+	TreeNode* newNode = new TreeNode(x);
+	while (p != nullptr) {
+		q = p;
+		if (x == p->data)
+			return false;
+		else if (x < p->data) 
+			p = p->LeftChild;
+		else 
+			p = p->RightChild;
+	}
+	if (x < q->data)
+		q->LeftChild = newNode;
+	else
+		q->RightChild = newNode;
+	rank();
+	return true;
 }
 
 bool Tree::remove(int num) {
 	TreeNode* p = root, * q = NULL, * parent = NULL;
-
-
+	
 }
 
 int Tree::search(int rank) {
 	TreeNode* p = root;
 	//Node의 leftsize가 찾는 rank보다 크면 왼쪽으로, 아니면 오른쪽으로 
+	while (p != nullptr) {
+		if (rank < p->leftSize)
+			p = p->LeftChild;
+		else if (rank > p->leftSize) {
+			p = p->RightChild;
+			rank -= p->leftSize;
+		}
+		else
+			return p->data;
+	}
+	return 0;
+}
+
+TreeNode* Tree::Rotate_LL(TreeNode* p) {
+	TreeNode* child = p->LeftChild;
+	p->LeftChild = child->RightChild;
+	child->RightChild = p;
+	return child;
+}
+
+TreeNode* Tree::Rotate_LR(TreeNode* p) {
+	TreeNode* child = p->LeftChild;
+	p->LeftChild = Rotate_RR(child);
+	return Rotate_LL(p);
+}
+
+TreeNode* Tree::Rotate_RL(TreeNode* p) {
+	TreeNode* child = p->RightChild;
+	p->RightChild = Rotate_LL(child);
+	return Rotate_RR(p);
+}
+
+TreeNode* Tree::Rotate_RR(TreeNode* p) {
+	TreeNode* child = p->RightChild;
+	p->RightChild = child->LeftChild;
+	child->LeftChild = p;
+	return child;
+}
+
+int Tree::Split(int i, Tree& B, Tree& C, int x) {
 
 }
+
+TreeNode* Tree::Rebalance(TreeNode* p) {
+	int height = GetBalance(p);
+	if (height > 1) {
+		if (GetBalance(p->LeftChild) > 0)
+			Rotate_LL(p);
+		else
+			Rotate_LR(p);
+	}
+	else if (height < 1) {
+		if (GetBalance(p->RightChild) > 0)
+			Rotate_RL(p);
+		else
+			Rotate_RR(p);
+	}
+	return p;
+}
+
 enum { Insert, Remove, Inorder, Preorder, Postorder, Search, Copy, Quit };
 int main() {
 	srand(time(NULL));
@@ -232,13 +327,8 @@ int main() {
 			cin >> x;
 			rankNumber = t.search(x); // x번째 순위의 값을 찾는다
 			cout << x << " 번째 순위 값은 " << rankNumber << endl;
-
 			break;
-		case Height:
-			t.depth();
-			t.inorder();
-			break;
-		case SplitJion:
+		case SplitJoin:
 			cin >> x;
 			split(x, A, B, y);
 			Tree tx = ThreeWayJoin(A, x, B);
