@@ -1,9 +1,9 @@
 /*
-* ·©Å© Á¤¼ö ÀÌÁøÆ®¸® 
-4. split -> Æ®¸®¸¦ ºĞ¸®ÇØ¼­ depth¸¦ ÁÙÀÌ´Â ¾Ë°í¸®Áò 
-Height(Tl) - Height(Tr) : ¿ŞÂÊ ¼­ºêÆ®¸® ³ôÀÌ - ¿À¸¥ÂÊ ¼­ºêÆ®¸® ³ôÀÌ 
-LLÅ¸ÀÔ : leftnode°¡ 2°³ ¿¬°á  
-LR, RL -> AVLÆ®¸® ÂüÁ¶ 
+* ë­í¬ ì •ìˆ˜ ì´ì§„íŠ¸ë¦¬
+4. split -> íŠ¸ë¦¬ë¥¼ ë¶„ë¦¬í•´ì„œ depthë¥¼ ì¤„ì´ëŠ” ì•Œê³ ë¦¬ì¦˜
+Height(Tl) - Height(Tr) : ì™¼ìª½ ì„œë¸ŒíŠ¸ë¦¬ ë†’ì´ - ì˜¤ë¥¸ìª½ ì„œë¸ŒíŠ¸ë¦¬ ë†’ì´
+LLíƒ€ì… : leftnodeê°€ 2ê°œ ì—°ê²°
+LR, RL -> AVLíŠ¸ë¦¬ ì°¸ì¡°
 */
 #include <iostream>
 #define MaxCapacity 20
@@ -14,9 +14,9 @@ class TreeNode {
 private:
 	TreeNode* LeftChild;
 	int data;
-	//leftSize = Æ®¸® ¿ŞÂÊÀÇ ³ëµå ¼ö + 1, height = Height(Tl) - Height(Tr) 
+	//leftSize = íŠ¸ë¦¬ ì™¼ìª½ì˜ ë…¸ë“œ ìˆ˜ + 1, height = Height(Tl) - Height(Tr) 
 	int leftSize, height;
-	TreeNode* RightChild; 
+	TreeNode* RightChild;
 
 public:
 	TreeNode() {
@@ -66,22 +66,21 @@ public:
 		rank(root);
 	}
 	int GetBalance(TreeNode*);
-	
-	int search(int rank);//nth ÀÛÀº °ªÀ» Ã£´Â´Ù 
+
+	int search(int rank);//nth ì‘ì€ ê°’ì„ ì°¾ëŠ”ë‹¤ 
 	// Driver
 	int operator==(const Tree& t)
 	{
 		return equal(this->root, t.root);
 	}
 	int GetHeight(TreeNode*);
-	TreeNode* Rotate_LL(TreeNode*);
-	TreeNode* Rotate_LR(TreeNode*);
-	TreeNode* Rotate_RL(TreeNode*);
-	TreeNode* Rotate_RR(TreeNode*);
-	TreeNode* Rebalance(TreeNode*);
+	TreeNode* Rotate_LL(Tree* A, TreeNode* p);
+	TreeNode* Rotate_LR(Tree* A, TreeNode* p);
+	TreeNode* Rotate_RL(Tree* A, TreeNode* p);
+	TreeNode* Rotate_RR(Tree* A, TreeNode* p);
 
-	int Split(int i, Tree& B, Tree& C, int x);
-	Tree* ThreeWayJoin(Tree* A, int x, Tree* B);
+	int Split(int i, Tree& B, Tree& C);
+	Tree ThreeWayJoin(Tree* A, int x, Tree* B);
 private:
 	TreeNode* root;
 	void inorder(TreeNode* CurrentNode);
@@ -93,7 +92,7 @@ private:
 	int depth(TreeNode*);
 };
 int Tree::rank(TreeNode* current) {
-	//leftsize °»½Å -> Àç±Í0 
+	//leftsize ê°±ì‹  -> ì¬ê·€0 
 	if (current == nullptr) return 0;
 	current->leftSize = 1 + rank(current->LeftChild);
 	TreeNode* p = current->LeftChild->RightChild;
@@ -187,18 +186,22 @@ equivalent. Otherwise, it will return 1 */
 }
 
 
-bool Tree::insert(int x) {// binary search tree¸¦ ¸¸µå´Â ÀÔ·Â => A + B * CÀ» tree·Î ¸¸µå´Â ¹æ¹ı: ÀÔ·Â ÇØ°áÇÏ´Â ¾Ë°í¸®Áò ÀÛ¼º ¹æ¹ıÀ»
-							// ¼³°èÇÏ¿© ±¸Çö
+bool Tree::insert(int x) {// binary search treeë¥¼ ë§Œë“œëŠ” ì…ë ¥ => A + B * Cì„ treeë¡œ ë§Œë“œëŠ” ë°©ë²•: ì…ë ¥ í•´ê²°í•˜ëŠ” ì•Œê³ ë¦¬ì¦˜ ì‘ì„± ë°©ë²•ì„
+	// ì„¤ê³„í•˜ì—¬ êµ¬í˜„
 	TreeNode* p = root;
 	TreeNode* q = NULL;
 	TreeNode* newNode = new TreeNode(x);
+	if (p == nullptr) {
+		root = newNode;
+		return true;
+	}
 	while (p != nullptr) {
 		q = p;
 		if (x == p->data)
 			return false;
-		else if (x < p->data) 
+		else if (x < p->data)
 			p = p->LeftChild;
-		else 
+		else
 			p = p->RightChild;
 	}
 	if (x < q->data)
@@ -211,12 +214,12 @@ bool Tree::insert(int x) {// binary search tree¸¦ ¸¸µå´Â ÀÔ·Â => A + B * CÀ» tre
 
 bool Tree::remove(int num) {
 	TreeNode* p = root, * q = NULL, * parent = NULL;
-	
+	return true;
 }
 
 int Tree::search(int rank) {
 	TreeNode* p = root;
-	//NodeÀÇ leftsize°¡ Ã£´Â rankº¸´Ù Å©¸é ¿ŞÂÊÀ¸·Î, ¾Æ´Ï¸é ¿À¸¥ÂÊÀ¸·Î 
+	//Nodeì˜ leftsizeê°€ ì°¾ëŠ” rankë³´ë‹¤ í¬ë©´ ì™¼ìª½ìœ¼ë¡œ, ì•„ë‹ˆë©´ ì˜¤ë¥¸ìª½ìœ¼ë¡œ 
 	while (p != nullptr) {
 		if (rank < p->leftSize)
 			p = p->LeftChild;
@@ -230,54 +233,98 @@ int Tree::search(int rank) {
 	return 0;
 }
 
-TreeNode* Tree::Rotate_LL(TreeNode* p) {
-	TreeNode* child = p->LeftChild;
+//Rotate_LL, LRì—ì„œ Aì˜ rootëŠ” p->LeftChild
+TreeNode* Tree::Rotate_LL(Tree* A, TreeNode* p) {
+	TreeNode* child = A->root;
 	p->LeftChild = child->RightChild;
 	child->RightChild = p;
 	return child;
 }
 
-TreeNode* Tree::Rotate_LR(TreeNode* p) {
+TreeNode* Tree::Rotate_LR(Tree* A, TreeNode* p) {
 	TreeNode* child = p->LeftChild;
-	p->LeftChild = Rotate_RR(child);
-	return Rotate_LL(p);
+	p->LeftChild = Rotate_RR(A, child);
+	return Rotate_LL(A, p);
 }
 
-TreeNode* Tree::Rotate_RL(TreeNode* p) {
-	TreeNode* child = p->RightChild;
-	p->RightChild = Rotate_LL(child);
-	return Rotate_RR(p);
+TreeNode* Tree::Rotate_RL(Tree* A, TreeNode* p) {
+	TreeNode* child = A->root;
+	p->RightChild = Rotate_LL(A, child);
+	return Rotate_RR(A, p);
 }
 
-TreeNode* Tree::Rotate_RR(TreeNode* p) {
-	TreeNode* child = p->RightChild;
+TreeNode* Tree::Rotate_RR(Tree* A, TreeNode* p) {
+	TreeNode* child = A->root;
 	p->RightChild = child->LeftChild;
 	child->LeftChild = p;
 	return child;
 }
 
-int Tree::Split(int i, Tree& B, Tree& C, int x) {
-
+int Tree::Split(int x, Tree& B, Tree& C) {
+	if (!root) {
+		B.root = C.root = 0;
+		return 0;
+	}
+	TreeNode* Y = new TreeNode;
+	TreeNode* L = Y;
+	TreeNode* Z = new TreeNode;
+	TreeNode* R = Z;
+	TreeNode* t = root;
+	while (t) {
+		if (x == t->data) {
+			L->RightChild = t->LeftChild;
+			R->LeftChild = t->RightChild;
+			B.root = Y->RightChild;
+			C.root = Z->LeftChild;
+			delete Y; delete Z;
+			return x;
+		}
+		else if (x < t->data) {
+			R->LeftChild = t;
+			R = t;
+			t = t->LeftChild;
+		}
+		else {
+			L->RightChild = t;
+			L = t;
+			t = t->RightChild;
+		}
+	}
+	L->RightChild = R->LeftChild = 0;
+	B.root = Y->RightChild;
+	delete Y;
+	C.root = Z->LeftChild;
+	delete Z;
+	return 0;
 }
 
-TreeNode* Tree::Rebalance(TreeNode* p) {
+Tree Tree::ThreeWayJoin(Tree* A, int x, Tree* B) {
+	TreeNode* p = root;
+	while (p != nullptr) {
+		if (p->data == x)
+			break;
+		else if (p->data < x)
+			p = p->RightChild;
+		else
+			p = p->LeftChild;
+	}
 	int height = GetBalance(p);
 	if (height > 1) {
 		if (GetBalance(p->LeftChild) > 0)
-			Rotate_LL(p);
+			Rotate_LL(A, p);
 		else
-			Rotate_LR(p);
+			Rotate_LR(A, p);
 	}
 	else if (height < 1) {
 		if (GetBalance(p->RightChild) > 0)
-			Rotate_RL(p);
+			Rotate_RL(B, p);
 		else
-			Rotate_RR(p);
+			Rotate_RR(B, p);
 	}
-	return p;
+	return *this;
 }
 
-enum { Insert, Remove, Inorder, Preorder, Postorder, Search, Copy, Quit };
+enum { Insert, Remove, Inorder, Preorder, Postorder, Search, Copy, SplitJoin, Quit };
 int main() {
 	srand(time(NULL));
 	Tree t;
@@ -287,7 +334,7 @@ int main() {
 	while (select != 7)
 	{
 		int rnd = 0;
-		cout << "BinarySearchTree. Select 0.Insert, 1. Remove, 2.Inorder, 3.Preorder, 4.Postorder, 5.Search, 6.Copy, 7.Quit =>";
+		cout << "BinarySearchTree. Select 0.Insert, 1. Remove, 2.Inorder, 3.Preorder, 4.Postorder, 5.Search, 6.Copy, 7. Split and Join, 8.Quit =>";
 		cin >> select;
 		switch (select)
 		{
@@ -303,7 +350,7 @@ int main() {
 		case Remove:
 			int x;
 			cin >> x;
-			cout << t.remove(x);//ÀÔ·ÂµÈ x¿¡ ´ëÇÑ tree ³ëµå¸¦ Ã£¾Æ »èÁ¦ÇÑ´Ù.
+			cout << t.remove(x);//ì…ë ¥ëœ xì— ëŒ€í•œ tree ë…¸ë“œë¥¼ ì°¾ì•„ ì‚­ì œí•œë‹¤.
 			cout << endl;
 			break;
 		case Inorder:
@@ -323,18 +370,21 @@ int main() {
 			break;
 		case Search:
 			t.rank();
-			cout << "Ã£°íÀÚ ÇÏ´Â rank ¼øÀ§ ÀÔ·Â: ";
+			cout << "ì°¾ê³ ì í•˜ëŠ” rank ìˆœìœ„ ì…ë ¥: ";
 			cin >> x;
-			rankNumber = t.search(x); // x¹øÂ° ¼øÀ§ÀÇ °ªÀ» Ã£´Â´Ù
-			cout << x << " ¹øÂ° ¼øÀ§ °ªÀº " << rankNumber << endl;
+			rankNumber = t.search(x); // xë²ˆì§¸ ìˆœìœ„ì˜ ê°’ì„ ì°¾ëŠ”ë‹¤
+			cout << x << " ë²ˆì§¸ ìˆœìœ„ ê°’ì€ " << rankNumber << endl;
 			break;
 		case SplitJoin:
+		{
 			cin >> x;
-			split(x, A, B, y);
-			Tree tx = ThreeWayJoin(A, x, B);
-			tx.inorder();
+			Tree A, B;
+			t.Split(x, A, B);
+			//Tree tx = t.ThreeWayJoin(A, x, B);
+			//tx.inorder();
+		}
 		case Copy:
-			eq = (t == Tree(t));//copy constructor¸¦ È£Ãâ
+			eq = (t == Tree(t));//copy constructorë¥¼ í˜¸ì¶œ
 			if (eq) {
 				cout << "compare result: true" << endl;
 			}
@@ -344,7 +394,6 @@ int main() {
 		case Quit:
 			cout << "Quit" << endl;
 			break;
-
 		default:
 			cout << "WRONG INPUT  " << endl;
 			cout << "Re-Enter" << endl;
@@ -356,4 +405,3 @@ int main() {
 	return 0;
 
 }
-
