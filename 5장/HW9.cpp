@@ -1,9 +1,9 @@
 /*
-* ë­í¬ ì •ìˆ˜ ì´ì§„íŠ¸ë¦¬
-4. split -> íŠ¸ë¦¬ë¥¼ ë¶„ë¦¬í•´ì„œ depthë¥¼ ì¤„ì´ëŠ” ì•Œê³ ë¦¬ì¦˜
-Height(Tl) - Height(Tr) : ì™¼ìª½ ì„œë¸ŒíŠ¸ë¦¬ ë†’ì´ - ì˜¤ë¥¸ìª½ ì„œë¸ŒíŠ¸ë¦¬ ë†’ì´
-LLíƒ€ì… : leftnodeê°€ 2ê°œ ì—°ê²°
-LR, RL -> AVLíŠ¸ë¦¬ ì°¸ì¡°
+* ·©Å© Á¤¼ö ÀÌÁøÆ®¸®
+4. split -> Æ®¸®¸¦ ºĞ¸®ÇØ¼­ depth¸¦ ÁÙÀÌ´Â ¾Ë°í¸®Áò
+Height(Tl) - Height(Tr) : ¿ŞÂÊ ¼­ºêÆ®¸® ³ôÀÌ - ¿À¸¥ÂÊ ¼­ºêÆ®¸® ³ôÀÌ
+LLÅ¸ÀÔ : leftnode°¡ 2°³ ¿¬°á
+LR, RL -> AVLÆ®¸® ÂüÁ¶
 */
 #include <iostream>
 #define MaxCapacity 20
@@ -14,7 +14,7 @@ class TreeNode {
 private:
 	TreeNode* LeftChild;
 	int data;
-	//leftSize = íŠ¸ë¦¬ ì™¼ìª½ì˜ ë…¸ë“œ ìˆ˜ + 1, height = Height(Tl) - Height(Tr) 
+	//leftSize = Æ®¸® ¿ŞÂÊÀÇ ³ëµå ¼ö + 1, height = Height(Tl) - Height(Tr) 
 	int leftSize, height;
 	TreeNode* RightChild;
 
@@ -37,7 +37,7 @@ public:
 	friend ostream& operator<<(ostream&, TreeNode&);
 };
 ostream& operator<<(ostream& os, TreeNode& tn) {
-	os << "[data: " << tn.data << ", leftSize: " << tn.leftSize << "]" << endl;
+	os << "[data: " << tn.data << ", leftSize: " << tn.leftSize << ", height: " << tn.height << "]" << endl;
 	return os;
 }
 class Tree {
@@ -65,9 +65,11 @@ public:
 	void rank() {
 		rank(root);
 	}
-	int GetBalance(TreeNode*);
+	void GetBalance() {
+		GetBalance(root);
+	}
 
-	int search(int rank);//nth ì‘ì€ ê°’ì„ ì°¾ëŠ”ë‹¤ 
+	int search(int rank);//nth ÀÛÀº °ªÀ» Ã£´Â´Ù 
 	// Driver
 	int operator==(const Tree& t)
 	{
@@ -79,7 +81,7 @@ public:
 	TreeNode* Rotate_RL(Tree* A, TreeNode* p);
 	TreeNode* Rotate_RR(Tree* A, TreeNode* p);
 
-	int Split(int i, Tree& B, Tree& C);
+	int Split(int i, Tree* B, Tree* C);
 	Tree ThreeWayJoin(Tree* A, int x, Tree* B);
 private:
 	TreeNode* root;
@@ -87,14 +89,17 @@ private:
 	void preorder(TreeNode* CurrentNode);
 	void postorder(TreeNode* CurrentNode);
 	TreeNode* copy(TreeNode* orignode);
+	int GetBalance(TreeNode*);
 	int equal(TreeNode* a, TreeNode* b);
 	int rank(TreeNode*);
 	int depth(TreeNode*);
 };
 int Tree::rank(TreeNode* current) {
-	//leftsize ê°±ì‹  -> ì¬ê·€0 
+	//leftsize °»½Å -> Àç±Í0 
 	if (current == nullptr) return 0;
 	current->leftSize = 1 + rank(current->LeftChild);
+	rank(current->RightChild);
+	if (current->LeftChild == nullptr) return current->leftSize;
 	TreeNode* p = current->LeftChild->RightChild;
 	while (p != nullptr) {
 		current->leftSize += rank(p);
@@ -113,6 +118,7 @@ int Tree::GetHeight(TreeNode* p) {
 int Tree::GetBalance(TreeNode* p) {
 	if (p == nullptr) return 0;
 	p->height = GetHeight(p->LeftChild) - GetHeight(p->RightChild);
+	GetBalance(p->RightChild); GetBalance(p->LeftChild);
 	return p->height;
 }
 
@@ -186,8 +192,8 @@ equivalent. Otherwise, it will return 1 */
 }
 
 
-bool Tree::insert(int x) {// binary search treeë¥¼ ë§Œë“œëŠ” ì…ë ¥ => A + B * Cì„ treeë¡œ ë§Œë“œëŠ” ë°©ë²•: ì…ë ¥ í•´ê²°í•˜ëŠ” ì•Œê³ ë¦¬ì¦˜ ì‘ì„± ë°©ë²•ì„
-	// ì„¤ê³„í•˜ì—¬ êµ¬í˜„
+bool Tree::insert(int x) {// binary search tree¸¦ ¸¸µå´Â ÀÔ·Â => A + B * CÀ» tree·Î ¸¸µå´Â ¹æ¹ı: ÀÔ·Â ÇØ°áÇÏ´Â ¾Ë°í¸®Áò ÀÛ¼º ¹æ¹ıÀ»
+	// ¼³°èÇÏ¿© ±¸Çö
 	TreeNode* p = root;
 	TreeNode* q = NULL;
 	TreeNode* newNode = new TreeNode(x);
@@ -213,19 +219,71 @@ bool Tree::insert(int x) {// binary search treeë¥¼ ë§Œë“œëŠ” ì…ë ¥ => A + B * C
 }
 
 bool Tree::remove(int num) {
-	TreeNode* p = root, * q = NULL, * parent = NULL;
+	TreeNode* p = root, * q = nullptr;
+	for (;;) {
+		if (p->data < num) {
+			//not found
+			if (p->RightChild == nullptr)
+				return false;
+			q = p;
+			p = p->RightChild;
+		}
+		else if (p->data > num) {
+			//not found
+			if (p->LeftChild == nullptr)
+				return false;
+			q = p;
+			p = p->LeftChild;
+		}
+		else {
+			//found
+			break;
+		}
+	}
+	if (isLeafNode(p)) {
+		cout << "Leaf" << endl;
+		if (p->data > q->data)
+			q->RightChild = nullptr;
+		else
+			q->LeftChild = nullptr;
+		return true;
+	}
+	TreeNode* target = p;
+	if (p->LeftChild != nullptr && p->RightChild != nullptr) {
+		q = p;
+		p = p->LeftChild;
+		while (p->RightChild != nullptr) {
+			q = p;
+			p = p->RightChild;
+		}
+		target->data = p->data;
+		q->RightChild = p->LeftChild;
+		return true;
+	}
+	else if (p->LeftChild != nullptr) {
+		p->data = p->LeftChild->data;
+		p->RightChild = p->LeftChild->RightChild;
+		p->LeftChild = p->LeftChild->LeftChild;
+		return true;
+	}
+	else {
+		p->data = p->RightChild->data;
+		p->LeftChild = p->RightChild->LeftChild;
+		p->RightChild = p->RightChild->RightChild;
+		return true;
+	}
 	return true;
 }
 
 int Tree::search(int rank) {
 	TreeNode* p = root;
-	//Nodeì˜ leftsizeê°€ ì°¾ëŠ” rankë³´ë‹¤ í¬ë©´ ì™¼ìª½ìœ¼ë¡œ, ì•„ë‹ˆë©´ ì˜¤ë¥¸ìª½ìœ¼ë¡œ 
+	//NodeÀÇ leftsize°¡ Ã£´Â rankº¸´Ù Å©¸é ¿ŞÂÊÀ¸·Î, ¾Æ´Ï¸é ¿À¸¥ÂÊÀ¸·Î 
 	while (p != nullptr) {
 		if (rank < p->leftSize)
 			p = p->LeftChild;
 		else if (rank > p->leftSize) {
-			p = p->RightChild;
 			rank -= p->leftSize;
+			p = p->RightChild;
 		}
 		else
 			return p->data;
@@ -233,7 +291,7 @@ int Tree::search(int rank) {
 	return 0;
 }
 
-//Rotate_LL, LRì—ì„œ Aì˜ rootëŠ” p->LeftChild
+//Rotate_LL, LR¿¡¼­ AÀÇ root´Â p->LeftChild
 TreeNode* Tree::Rotate_LL(Tree* A, TreeNode* p) {
 	TreeNode* child = A->root;
 	p->LeftChild = child->RightChild;
@@ -260,9 +318,9 @@ TreeNode* Tree::Rotate_RR(Tree* A, TreeNode* p) {
 	return child;
 }
 
-int Tree::Split(int x, Tree& B, Tree& C) {
+int Tree::Split(int x, Tree* B, Tree* C) {
 	if (!root) {
-		B.root = C.root = 0;
+		B->root = C->root = 0;
 		return 0;
 	}
 	TreeNode* Y = new TreeNode;
@@ -270,12 +328,12 @@ int Tree::Split(int x, Tree& B, Tree& C) {
 	TreeNode* Z = new TreeNode;
 	TreeNode* R = Z;
 	TreeNode* t = root;
-	while (t) {
+	while (t != nullptr) {
 		if (x == t->data) {
 			L->RightChild = t->LeftChild;
 			R->LeftChild = t->RightChild;
-			B.root = Y->RightChild;
-			C.root = Z->LeftChild;
+			B->root = Y->RightChild;
+			C->root = Z->LeftChild;
 			delete Y; delete Z;
 			return x;
 		}
@@ -291,9 +349,9 @@ int Tree::Split(int x, Tree& B, Tree& C) {
 		}
 	}
 	L->RightChild = R->LeftChild = 0;
-	B.root = Y->RightChild;
+	B->root = Y->RightChild;
 	delete Y;
-	C.root = Z->LeftChild;
+	C->root = Z->LeftChild;
 	delete Z;
 	return 0;
 }
@@ -301,6 +359,7 @@ int Tree::Split(int x, Tree& B, Tree& C) {
 Tree Tree::ThreeWayJoin(Tree* A, int x, Tree* B) {
 	TreeNode* p = root;
 	while (p != nullptr) {
+		cout << "p: " << p->data << endl;
 		if (p->data == x)
 			break;
 		else if (p->data < x)
@@ -340,17 +399,18 @@ int main() {
 		{
 		case Insert:
 			cout << "The number of items = ";
-			cin >> max;
-			for (int i = 0; i < max; i++) {
-				rnd = rand() % 20;
-				if (!t.insert(rnd)) cout << "Insert Duplicated data" << endl;
+			//cin >> max;
+			for (int i = 0; i < 10; i++) {
+				//rnd = rand() % 20;
+				cin >> max;
+				if (!t.insert(max)) cout << "Insert Duplicated data" << endl;
 			}
-
+			t.GetBalance();
 			break;
 		case Remove:
 			int x;
 			cin >> x;
-			cout << t.remove(x);//ì…ë ¥ëœ xì— ëŒ€í•œ tree ë…¸ë“œë¥¼ ì°¾ì•„ ì‚­ì œí•œë‹¤.
+			cout << t.remove(x);//ÀÔ·ÂµÈ x¿¡ ´ëÇÑ tree ³ëµå¸¦ Ã£¾Æ »èÁ¦ÇÑ´Ù.
 			cout << endl;
 			break;
 		case Inorder:
@@ -370,21 +430,25 @@ int main() {
 			break;
 		case Search:
 			t.rank();
-			cout << "ì°¾ê³ ì í•˜ëŠ” rank ìˆœìœ„ ì…ë ¥: ";
+			cout << "Ã£°íÀÚ ÇÏ´Â rank ¼øÀ§ ÀÔ·Â: ";
 			cin >> x;
-			rankNumber = t.search(x); // xë²ˆì§¸ ìˆœìœ„ì˜ ê°’ì„ ì°¾ëŠ”ë‹¤
-			cout << x << " ë²ˆì§¸ ìˆœìœ„ ê°’ì€ " << rankNumber << endl;
+			rankNumber = t.search(x); // x¹øÂ° ¼øÀ§ÀÇ °ªÀ» Ã£´Â´Ù
+			cout << x << " ¹øÂ° ¼øÀ§ °ªÀº " << rankNumber << endl;
 			break;
 		case SplitJoin:
 		{
+			cout << "ºĞ¸®ÇÒ ³ëµåÀÇ °ª ÀÔ·Â: ";
 			cin >> x;
-			Tree A, B;
+			Tree* A = new Tree;
+			Tree* B = new Tree;
 			t.Split(x, A, B);
-			//Tree tx = t.ThreeWayJoin(A, x, B);
-			//tx.inorder();
+			B->inorder();
+			Tree tx = t.ThreeWayJoin(A, x, B);
+			tx.inorder();
+			break;
 		}
 		case Copy:
-			eq = (t == Tree(t));//copy constructorë¥¼ í˜¸ì¶œ
+			eq = (t == Tree(t));//copy constructor¸¦ È£Ãâ
 			if (eq) {
 				cout << "compare result: true" << endl;
 			}
