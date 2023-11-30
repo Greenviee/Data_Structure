@@ -76,10 +76,10 @@ public:
 		return equal(this->root, t.root);
 	}
 	int GetHeight(TreeNode*);
-	TreeNode* Rotate_LL(Tree* A, TreeNode* p);
-	TreeNode* Rotate_LR(Tree* A, TreeNode* p);
-	TreeNode* Rotate_RL(Tree* A, TreeNode* p);
-	TreeNode* Rotate_RR(Tree* A, TreeNode* p);
+	TreeNode* Rotate_LL(Tree* A, TreeNode* p, TreeNode* q);
+	TreeNode* Rotate_LR(Tree* A, TreeNode* p, TreeNode* q);
+	TreeNode* Rotate_RL(Tree* A, TreeNode* p, TreeNode* q);
+	TreeNode* Rotate_RR(Tree* A, TreeNode* p, TreeNode* q);
 
 	int Split(int i, Tree* B, Tree* C);
 	Tree ThreeWayJoin(Tree* A, int x, Tree* B);
@@ -92,7 +92,6 @@ private:
 	int GetBalance(TreeNode*);
 	int equal(TreeNode* a, TreeNode* b);
 	int rank(TreeNode*);
-	int depth(TreeNode*);
 };
 int Tree::rank(TreeNode* current) {
 	//leftsize 갱신 -> 재귀0 
@@ -171,6 +170,8 @@ TreeNode* Tree::copy(TreeNode* orignode)
 		temp->data = orignode->data;
 		temp->LeftChild = copy(orignode->LeftChild);
 		temp->RightChild = copy(orignode->RightChild);
+		temp->height = orignode->height;
+		temp->leftSize = orignode->leftSize;
 		return temp;
 	}
 	else return 0;
@@ -292,29 +293,81 @@ int Tree::search(int rank) {
 }
 
 //Rotate_LL, LR에서 A의 root는 p->LeftChild
-TreeNode* Tree::Rotate_LL(Tree* A, TreeNode* p) {
+TreeNode* Tree::Rotate_LL(Tree* A, TreeNode* p, TreeNode* q) {
+	cout << "Rotate LL" << endl;
 	TreeNode* child = A->root;
 	p->LeftChild = child->RightChild;
 	child->RightChild = p;
+	if (q == nullptr)
+		root = child;
+	else if (q->data < p->data)
+		q->RightChild = child;
+	else
+		q->LeftChild = child;
+	rank(); GetBalance();
 	return child;
 }
 
-TreeNode* Tree::Rotate_LR(Tree* A, TreeNode* p) {
-	TreeNode* child = p->LeftChild;
-	p->LeftChild = Rotate_RR(A, child);
-	return Rotate_LL(A, p);
+TreeNode* Tree::Rotate_LR(Tree* A, TreeNode* p, TreeNode* q) {
+	cout << "Rotate LR" << endl;
+	TreeNode* x = p->LeftChild;
+	TreeNode* y = x->RightChild;
+	TreeNode* t1 = x->LeftChild;
+	TreeNode* t2 = y->LeftChild;
+	TreeNode* t3 = y->RightChild;
+	TreeNode* t4 = p->RightChild;
+	if (q == nullptr)
+		root = y;
+	else if (q->data < p->data)
+		q->RightChild = y;
+	else
+		q->LeftChild = y;
+	y->LeftChild = x;
+	y->RightChild = p;
+	x->LeftChild = t1;
+	x->RightChild = t2;
+	p->LeftChild = t3;
+	p->RightChild = t4;
+	rank(); GetBalance();
+	return p;
 }
 
-TreeNode* Tree::Rotate_RL(Tree* A, TreeNode* p) {
-	TreeNode* child = A->root;
-	p->RightChild = Rotate_LL(A, child);
-	return Rotate_RR(A, p);
+TreeNode* Tree::Rotate_RL(Tree* A, TreeNode* p, TreeNode* q) {
+	cout << "Rotate RL" << endl;
+	TreeNode* x = p->RightChild;
+	TreeNode* y = x->LeftChild;
+	TreeNode* t1 = p->LeftChild;
+	TreeNode* t2 = y->LeftChild;
+	TreeNode* t3 = y->RightChild;
+	TreeNode* t4 = x->RightChild;
+	if (q == nullptr)
+		root = y;
+	else if (q->data < p->data)
+		q->RightChild = y;
+	else
+		q->LeftChild = y;
+	y->LeftChild = p;
+	y->RightChild = x;
+	p->LeftChild = t1;
+	p->RightChild = t2;
+	x->LeftChild = t3;
+	x->RightChild = t4;
+	rank(); GetBalance();
+	return p;
 }
 
-TreeNode* Tree::Rotate_RR(Tree* A, TreeNode* p) {
+TreeNode* Tree::Rotate_RR(Tree* A, TreeNode* p, TreeNode* q) {
+	cout << "Rotate RR" << endl;
 	TreeNode* child = A->root;
 	p->RightChild = child->LeftChild;
 	child->LeftChild = p;
+	if (q == nullptr)
+		root = child;
+	else if (q->data < p->data)
+		q->RightChild = child;
+	else
+		q->LeftChild = child;
+	rank(); GetBalance();
 	return child;
 }
 
@@ -323,62 +376,53 @@ int Tree::Split(int x, Tree* B, Tree* C) {
 		B->root = C->root = 0;
 		return 0;
 	}
-	TreeNode* Y = new TreeNode;
-	TreeNode* L = Y;
-	TreeNode* Z = new TreeNode;
-	TreeNode* R = Z;
+	TreeNode* L = new TreeNode;
+	TreeNode* R = new TreeNode;
 	TreeNode* t = root;
 	while (t != nullptr) {
 		if (x == t->data) {
-			L->RightChild = t->LeftChild;
-			R->LeftChild = t->RightChild;
-			B->root = Y->RightChild;
-			C->root = Z->LeftChild;
-			delete Y; delete Z;
+			L = t->LeftChild;
+			R = t->RightChild;
+			B->root = L;
+			C->root = R;
 			return x;
 		}
-		else if (x < t->data) {
-			R->LeftChild = t;
-			R = t;
+		else if (x < t->data)
 			t = t->LeftChild;
-		}
-		else {
-			L->RightChild = t;
-			L = t;
+		else
 			t = t->RightChild;
-		}
 	}
-	L->RightChild = R->LeftChild = 0;
-	B->root = Y->RightChild;
-	delete Y;
-	C->root = Z->LeftChild;
-	delete Z;
+	B->root = L;
+	C->root = R;
 	return 0;
 }
 
 Tree Tree::ThreeWayJoin(Tree* A, int x, Tree* B) {
-	TreeNode* p = root;
+	TreeNode* p = root, * q = nullptr;
 	while (p != nullptr) {
-		cout << "p: " << p->data << endl;
 		if (p->data == x)
 			break;
-		else if (p->data < x)
+		else if (p->data < x) {
+			q = p;
 			p = p->RightChild;
-		else
+		}
+		else {
+			q = p;
 			p = p->LeftChild;
+		}
 	}
 	int height = GetBalance(p);
 	if (height > 1) {
 		if (GetBalance(p->LeftChild) > 0)
-			Rotate_LL(A, p);
+			Rotate_LL(A, p, q);
 		else
-			Rotate_LR(A, p);
+			Rotate_LR(A, p, q);
 	}
 	else if (height < 1) {
 		if (GetBalance(p->RightChild) > 0)
-			Rotate_RL(B, p);
+			Rotate_RL(B, p, q);
 		else
-			Rotate_RR(B, p);
+			Rotate_RR(B, p, q);
 	}
 	return *this;
 }
@@ -390,7 +434,7 @@ int main() {
 	bool eq = false;
 	int select = 0, rankNumber = 0;
 	int max = 0, x = 0;
-	while (select != 7)
+	while (select != 8)
 	{
 		int rnd = 0;
 		cout << "BinarySearchTree. Select 0.Insert, 1. Remove, 2.Inorder, 3.Preorder, 4.Postorder, 5.Search, 6.Copy, 7. Split and Join, 8.Quit =>";
@@ -399,11 +443,10 @@ int main() {
 		{
 		case Insert:
 			cout << "The number of items = ";
-			//cin >> max;
+			cin >> max;
 			for (int i = 0; i < 10; i++) {
-				//rnd = rand() % 20;
-				cin >> max;
-				if (!t.insert(max)) cout << "Insert Duplicated data" << endl;
+				rnd = rand() % 20;
+				if (!t.insert(rnd)) cout << "Insert Duplicated data" << endl;
 			}
 			t.GetBalance();
 			break;
@@ -442,7 +485,6 @@ int main() {
 			Tree* A = new Tree;
 			Tree* B = new Tree;
 			t.Split(x, A, B);
-			B->inorder();
 			Tree tx = t.ThreeWayJoin(A, x, B);
 			tx.inorder();
 			break;
