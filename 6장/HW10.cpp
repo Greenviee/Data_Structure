@@ -32,7 +32,7 @@ public:
 };
 
 ostream& operator<<(ostream& os, Edge& x) {
-	os << "½ÃÀÛ ÁöÁ¡: " << x.src << " µµÂø ÁöÁ¡: " << x.dest << " °¡ÁßÄ¡: " << x.weight << endl;
+	os << "ì‹œì‘ ì§€ì : " << x.src << " ë„ì°© ì§€ì : " << x.dest << " ê°€ì¤‘ì¹˜: " << x.weight << endl;
 	return os;
 }
 
@@ -49,6 +49,7 @@ public:
 	Edge* DeleteMin();
 	void HeapEmpty();
 	void HeapFull();
+	bool isEmpty();
 private:
 	int n = 0; // current size of MaxHeap
 	int MaxSize = 0; // Maximum allowable size of MaxHeap
@@ -102,7 +103,7 @@ Edge* Heap::DeleteMin()
 	for (i = 1, j = 2; j <= n;)
 	{
 		if (j < n)
-			if (heap[j].compare(heap[j+1]) > 0)
+			if (heap[j].compare(heap[j + 1]) > 0)
 				j++;
 		if (k.compare(heap[j]) < 0)
 			break;
@@ -122,6 +123,12 @@ void Heap::HeapEmpty()
 void Heap::HeapFull()
 {
 	cout << "Heap Full" << endl;
+}
+
+bool Heap::isEmpty() {
+	if (n == 0)
+		return true;
+	return false;
 }
 
 template <class Type> class List;
@@ -289,49 +296,27 @@ public:
 	Sets(int sz = 100) {
 		n = sz;
 		parent = new int[sz + 1];
-		for (int i = 1; i <= n; i++) parent[i] = -1;
+		for (int i = 0; i <= n; i++) parent[i] = i;
 	}
 	void display();
 	void SimpleUnion(int, int);
 	int SimpleFind(int);
-	void WeightedUnion(int, int);
-	int CollapsingFind(int);
 private:
 	int* parent;
 	int n;
 };
 
 void Sets::SimpleUnion(int i, int j) {
-	parent[j] = i;
+	i = SimpleFind(i);
+	j = SimpleFind(j);
+	if (i < j) parent[j] = i;
+	else parent[i] = j;
 }
 
 int Sets::SimpleFind(int i) {
-	while (parent[i] > 0)
-		i = parent[i];
-	return i;
-}
-
-void Sets::WeightedUnion(int i, int j) {
-	int temp = parent[i] + parent[j];
-	if (parent[i] > parent[j]) {
-		parent[i] = j;
-		parent[j] = temp;
-	}
-	else {
-		parent[j] = i;
-		parent[i] = temp;
-	}
-}
-
-int Sets::CollapsingFind(int i) {
-	int r;
-	for (r = i; parent[r] > 0; r = parent[r]);
-	while (i != r) {
-		int s = parent[i];
-		parent[i] = r;
-		i = s;
-	}
-	return r;
+	if (parent[i] == i)
+		return i;
+	return parent[i] = SimpleFind(parent[i]);
 }
 
 void Sets::display() {
@@ -396,7 +381,7 @@ void KruskalMST(Graph graph, int n) {
 		cout << "no spanning tree" << endl;
 		return;
 	}
-	// MST Ãâ·Â
+	// MST ì¶œë ¥
 
 	for (int k = 0; k < t; k++)
 		cout << result[k];
@@ -426,12 +411,12 @@ Edge* Graph::getNextEdge(int from, int to, bool* visited) {
 
 void Prim(Graph graph, int n) {
 	Edge* edgeSet = new Edge[30];
-	Edge* result = new Edge[30]; 
-	int t = 0; 
+	Edge* result = new Edge[30];
+	int t = 0;
 	int edgeNum = 0;
 	edgeNum = graph.makeEdgeSet(edgeSet, edgeNum);
 	Heap* hp = new Heap(100);
-	for (int j = 0; j < edgeNum; j++) 
+	for (int j = 0; j < edgeNum; j++)
 		hp->Insert(&edgeSet[j]);
 	Sets* m = new Sets(20);
 	bool* visited = new bool[n];
@@ -444,12 +429,14 @@ void Prim(Graph graph, int n) {
 		if (nextEdge == nullptr)
 			break;
 		int from = nextEdge->src, to = nextEdge->dest;
-		if (m->SimpleFind(from) == m->SimpleFind(to))//cycleÀ» ¸¸µé¸é skip
+		if (m->SimpleFind(from) == m->SimpleFind(to)) {
+			nextEdge = graph.getNextEdge(from, to, visited);//cycleì„ ë§Œë“¤ë©´ skip
 			continue;
+		}
 		m->SimpleUnion(from, to);
 		visited[from] = visited[to] = true;
 		result[t++] = *nextEdge;
-		//set¿¡ ÀÖ´Â ¸ğµç ³ëµåµé¿¡ ÀÎÁ¢ÇÑ edge¿¡¼­ ¾ÆÁ÷ ¹æ¹®ÇÏÁö ¾ÊÀº ³ëµåµéÀ» ¿¬°áÇÑ edgeÀÇ °¡ÁßÄ¡°¡ °¡Àå ÀÛÀº °Í
+		//setì— ìˆëŠ” ëª¨ë“  ë…¸ë“œë“¤ì— ì¸ì ‘í•œ edgeì—ì„œ ì•„ì§ ë°©ë¬¸í•˜ì§€ ì•Šì€ ë…¸ë“œë“¤ì„ ì—°ê²°í•œ edgeì˜ ê°€ì¤‘ì¹˜ê°€ ê°€ì¥ ì‘ì€ ê²ƒ
 		nextEdge = graph.getNextEdge(from, to, visited);
 		// Else discard the next_edge
 	}
@@ -465,7 +452,48 @@ void Prim(Graph graph, int n) {
 }
 
 void Sollin(Graph graph, int n) {
-
+	Edge* edgeSet = new Edge[30];
+	Edge* result = new Edge[30];
+	int t = 0;
+	int edgeNum = 0;
+	edgeNum = graph.makeEdgeSet(edgeSet, edgeNum);
+	Heap* hp = new Heap(100);
+	Heap* hp2 = new Heap(100);
+	for (int j = 0; j < edgeNum; j++)
+		hp->Insert(&edgeSet[j]);
+	Sets* m = new Sets(20);
+	bool* visited = new bool[n];
+	for (int i = 0; i < n; i++)
+		visited[i] = false;
+	Edge* p = hp->DeleteMin();
+	while (!hp->isEmpty()) {
+		int from = p->src, to = p->dest;
+		if (!visited[from] || !visited[to]) {
+			result[t++] = *p;
+			visited[from] = visited[to] = true;
+			m->SimpleUnion(from, to);
+		}
+		else {
+			hp2->Insert(p);
+		}
+		p = hp->DeleteMin();
+	}
+	Edge* q = hp2->DeleteMin();
+	while (t < n - 1) {
+		if (q == nullptr)
+			break;
+		int from = q->src, to = q->dest;
+		if (m->SimpleFind(from) == m->SimpleFind(to)) {//cycleì„ ë§Œë“¤ë©´ skip
+			q = hp2->DeleteMin();
+			continue;
+		}
+		m->SimpleUnion(from, to);
+		visited[from] = visited[to] = true;
+		result[t++] = *q;
+		q = hp2->DeleteMin();
+	}
+	for (int k = 0; k < t; k++)
+		cout << result[k];
 }
 
 int main() {
@@ -476,16 +504,15 @@ int main() {
 	cin >> n;
 	Graph graph(n);
 	while (select != 6) {
-		cout << "¸í·É¼±ÅÃ:: 1.edges/Weight ÀÔ·Â, 2. Adjacency Lists Ãâ·Â, 3. KruskalMST, 4. PrimMST, 5. Sollin, 6. Quit =>";
+		cout << "ëª…ë ¹ì„ íƒ:: 1.edges/Weight ì…ë ¥, 2. Adjacency Lists ì¶œë ¥, 3. KruskalMST, 4. PrimMST, 5. Sollin, 6. Quit =>";
 		cin >> select;
 		switch (select) {
 		case 1:
-			/*
-			cout << "edge Ãß°¡: from vertext: ";
+			cout << "edge ì¶”ê°€: from vertext: ";
 			cin >> startEdge;
 			cout << "to vertex: ";
 			cin >> endEdge;
-			cout << "°¡ÁßÄ¡: ";
+			cout << "ê°€ì¤‘ì¹˜: ";
 			cin >> weight;
 			if (startEdge < 0 || startEdge >= n || endEdge < 0 || endEdge >= n) {
 				cout << "the input node is out of bound." << endl;
@@ -496,7 +523,8 @@ int main() {
 			if (endEdge < startBFSNode)
 				startBFSNode = endEdge;
 			graph.InsertVertex(startEdge, endEdge, weight);
-			*/
+			/*
+			êµì¬ì— ìˆëŠ” ê·¸ë˜í”„ í…ŒìŠ¤íŠ¸
 			graph.InsertVertex(0, 1, 28);
 			graph.InsertVertex(0, 5, 10);
 			graph.InsertVertex(1, 2, 16);
@@ -506,20 +534,21 @@ int main() {
 			graph.InsertVertex(3, 4, 22);
 			graph.InsertVertex(4, 5, 25);
 			graph.InsertVertex(4, 6, 24);
+			*/
 			break;
 		case 2:
 			graph.displayAdjacencyLists();
 			break;
 		case 3:
-			cout << "Minimal Spanning Tree ÀÛ¾÷ ½ÃÀÛ" << endl;
+			cout << "Minimal Spanning Tree ì‘ì—… ì‹œì‘" << endl;
 			KruskalMST(graph, n);
 			break;
 		case 4:
-			cout << "Minimal Spanning Tree ÀÛ¾÷ ½ÃÀÛ" << endl;
+			cout << "Minimal Spanning Tree ì‘ì—… ì‹œì‘" << endl;
 			Prim(graph, n);
 			break;
 		case 5:
-			cout << "Minimal Spanning Tree ÀÛ¾÷ ½ÃÀÛ" << endl;
+			cout << "Minimal Spanning Tree ì‘ì—… ì‹œì‘" << endl;
 			Sollin(graph, n);
 			break;
 		case 6:
