@@ -1,19 +1,17 @@
-#include <string>
 #include <iostream>
+#include <string>
 #include <memory>
 using namespace std;
 
 class Edge;
 
-class MinHeap
-{
+class MinHeap {
 public:
 	virtual void Insert(Edge* x) = 0;
 	virtual Edge* DeleteMin() = 0;
 };
 
-class Edge
-{
+class Edge {
 public:
 	int src = 0;
 	int dest = 0;
@@ -36,8 +34,7 @@ ostream& operator<<(ostream& os, Edge& x) {
 	return os;
 }
 
-class Heap : public MinHeap
-{
+class Heap : public MinHeap {
 public:
 	const int heapSize = 100;
 	Heap(int sz) : MaxSize(sz) {
@@ -51,47 +48,36 @@ public:
 	void HeapFull();
 	bool isEmpty();
 private:
-	int n = 0; // current size of MaxHeap
-	int MaxSize = 0; // Maximum allowable size of MaxHeap
+	int n = 0;
+	int MaxSize = 0;
 	Edge* heap;
 };
 
-void Heap::display()
-{
-	for (int i = 1; i <= n; i++) {
+void Heap::display() {
+	for (int i = 1; i <= n; i++)
 		cout << heap[i];
-	}
 }
 
-void Heap::Insert(Edge* x)
-{
+void Heap::Insert(Edge* x) {
 	int i;
-	if (n == MaxSize)
-	{
+	if (n == MaxSize) {
 		HeapFull();
 		return;
 	}
 	n++;
-	for (i = n; i >= 1;)
-	{
-		// at root
+	for (i = n; i >= 1;) {
 		if ((i == 1) || (x->compare(heap[i / 2]) > -1))
-		{
 			break;
-		}
-		// move from parent to i
 		heap[i] = heap[i / 2];
 		i /= 2;
 	}
 	heap[i] = *x;
 }
 
-Edge* Heap::DeleteMin()
-{
+Edge* Heap::DeleteMin() {
 	Edge x;
 	int i, j;
-	if (n == 0)
-	{
+	if (n == 0) {
 		HeapEmpty();
 		Edge* elm = nullptr;
 		return elm;
@@ -99,9 +85,7 @@ Edge* Heap::DeleteMin()
 	x = heap[1];
 	Edge k = heap[n];
 	n--;
-
-	for (i = 1, j = 2; j <= n;)
-	{
+	for (i = 1, j = 2; j <= n;) {
 		if (j < n)
 			if (heap[j].compare(heap[j + 1]) > 0)
 				j++;
@@ -115,13 +99,11 @@ Edge* Heap::DeleteMin()
 	return &x;
 }
 
-void Heap::HeapEmpty()
-{
-	cout << "Heap Empty" << endl;
+void Heap::HeapEmpty() {
+	cout << "Hea Empty" << endl;
 }
 
-void Heap::HeapFull()
-{
+void Heap::HeapFull() {
 	cout << "Heap Full" << endl;
 }
 
@@ -131,107 +113,98 @@ bool Heap::isEmpty() {
 	return false;
 }
 
-template <class Type> class List;
-template <class Type> class ListIterator;
+template <class T> class List;
+template <class T> class ListIterator;
 
-template <class Type>
+template <class T>
 class ListNode {
-	friend class List<Type>;
-	friend class ListIterator<Type>;
+	friend class List<T>;
+	friend class ListIterator<T>;
 	friend class Graph;
 private:
-	Type data;
+	T data;
 	int weight;
 	ListNode* link;
-	ListNode(Type);
+	ListNode(T);
 };
 
-template <class Type>
-ListNode<Type>::ListNode(Type Default)
-{
+template <class T>
+ListNode<T>::ListNode(T Default) {
 	data = Default;
 	weight = 0;
 	link = nullptr;
 }
 
-template <class Type>
+template <class T>
 class List {
-	friend class ListIterator<Type>;
+	friend class ListIterator<T>;
 	friend class Graph;
 public:
-	List() { first = 0; };
-	void Insert(Type k, int weight);
-	void Delete(Type);
+	List() { first = 0; }
+	void Insert(T k, int weight);
+	void Delete(T);
 private:
-	ListNode<Type>* first;
+	ListNode<T>* first;
 };
 
-template <class Type>
-void List<Type>::Insert(Type k, int weight)
-{
-	ListNode<Type>* newnode = new ListNode<Type>(k);
-	newnode->weight = weight;
-	newnode->link = first;
-	first = newnode;
+template <class T>
+void List<T>::Insert(T k, int weight) {
+	ListNode<T>* newNode = new ListNode<T>(k);
+	newNode->weight = weight;
+	newNode->link = first;
+	first = newNode;
 }
 
-template <class Type>
-void List<Type>::Delete(Type k)
-{
-	ListNode<Type>* previous = 0;
-	ListNode<Type>* current;
-	for (current = first; current && current->data != k;
-		previous = current, current = current->link);
-	if (current)
-	{
-		if (previous) previous->link = current->link;
+template <class T>
+void List<T>::Delete(T k) {
+	ListNode<T>* p = nullptr;
+	ListNode<T>* current;
+	for (current = first; current && current->data != k; p = current, current = current->link);
+	if (current) {
+		if (p) p->link = current->link;
 		else first = first->link;
 		delete current;
 	}
 }
 
-template <class Type>
+template <class T>
 class ListIterator {
 public:
-	ListIterator(const List<Type>& l) : list(l) { current = l.first; }
-	Type* First();
-	Type* Next();
+	ListIterator(const List<T>& l) : list(l) { current = l.first; }
+	T* First();
+	T* Next();
 	bool NotNull();
 	bool NextNotNull();
 private:
-	const List<Type>& list;
-	ListNode<Type>* current;
+	const List<T>& list;
+	ListNode<T>* current;
 };
 
-template <class Type>
-Type* ListIterator<Type>::First() {
+template <class T>
+T* ListIterator<T>::First() {
 	if (current) return &current->data;
 	else return 0;
 }
 
-template <class Type>
-Type* ListIterator<Type>::Next() {
+template <class T>
+T* ListIterator<T>::Next() {
 	current = current->link;
 	return &current->data;
 }
 
-template <class Type>
-bool ListIterator<Type>::NotNull()
-{
+template <class T>
+bool ListIterator<T>::NotNull() {
 	if (current) return true;
 	else return false;
 }
 
-template <class Type>
-bool ListIterator<Type>::NextNotNull()
-{
+template <class T>
+bool ListIterator<T>::NextNotNull() {
 	if (current->link) return true;
 	else return false;
 }
 
-//template <class Type>
-ostream& operator<<(ostream& os, List<char>& l)
-{
+ostream& operator<<(ostream& os, List<char>& l) {
 	ListIterator<char> li(l);
 	if (!li.NotNull()) return os;
 	os << *li.First() << endl;
@@ -240,38 +213,32 @@ ostream& operator<<(ostream& os, List<char>& l)
 	return os;
 }
 
-
-class Graph
-{
+class Graph {
 private:
 	List<int>* HeadNodes;
 	int n;
 	bool* visited;
-public:
+public: 
 	Graph(int vertices = 0) : n(vertices) {
 		HeadNodes = new List<int>[n];
-	};
+	}
 	void InsertVertex(int startNode, int endNode, int weight);
 	void displayAdjacencyLists();
-	int getn() {
-		return n;
-	}
+	int getn() { return n; }
 	int makeEdgeSet(Edge* edgeSet, int e);
-	Edge* getNextEdge(int from, int to, bool* visited);
+	Edge* getNextEdge(bool* visited);
 };
 
 void Graph::displayAdjacencyLists() {
 	for (int i = 0; i < n; i++) {
-		//HeadNodes[i];
 		ListIterator<int> iter(HeadNodes[i]);
 		if (!iter.NotNull()) {
 			cout << i << " -> null" << endl;
 			continue;
 		}
 		cout << i;
-		for (int* first = iter.First(); iter.NotNull(); first = iter.Next()) {
+		for (int* first = iter.First(); iter.NotNull(); first = iter.Next())
 			cout << " -> " << (*first);
-		}
 		cout << endl;
 	}
 }
@@ -281,12 +248,9 @@ void Graph::InsertVertex(int start, int end, int weight) {
 		cout << "the start node number is out of bound.";
 		throw "";
 	}
-	//check if already existed.
 	ListIterator<int> iter(HeadNodes[start]);
-	for (int* first = iter.First(); iter.NotNull(); first = iter.Next()) {
+	for (int* first = iter.First(); iter.NotNull(); first = iter.Next())
 		if (*first == end) return;
-	}
-
 	HeadNodes[start].Insert(end, weight);
 	HeadNodes[end].Insert(start, weight);
 }
@@ -296,7 +260,8 @@ public:
 	Sets(int sz = 100) {
 		n = sz;
 		parent = new int[sz + 1];
-		for (int i = 0; i <= n; i++) parent[i] = i;
+		for (int i = 0; i <= n; i++)
+			parent[i] = i;
 	}
 	void display();
 	void SimpleUnion(int, int);
@@ -331,10 +296,9 @@ void Sets::display() {
 }
 
 int addEdgeSet(Edge* edgeSet, int e, int from, int to, int w) {
-	for (int i = 0; i < e; i++) {
+	for (int i = 0; i < e; i++)
 		if ((edgeSet[i].src == from) && (edgeSet[i].dest == to))
 			return 0;
-	}
 	edgeSet[e].src = from;
 	edgeSet[e].dest = to;
 	edgeSet[e].weight = w;
@@ -346,7 +310,7 @@ int Graph::makeEdgeSet(Edge* edgeSet, int e) {
 	int result = 0;
 	for (int i = 0; i < n; i++) {
 		ListNode<int>* p = HeadNodes[i].first;
-		while (p != nullptr) {
+		while(p != nullptr) {
 			if (p->data > i)
 				result = addEdgeSet(edgeSet, e, i, p->data, p->weight);
 			if (result != 0)
@@ -381,14 +345,12 @@ void KruskalMST(Graph graph, int n) {
 		cout << "no spanning tree" << endl;
 		return;
 	}
-	// MST 출력
-
 	for (int k = 0; k < t; k++)
 		cout << result[k];
 	return;
 }
 
-Edge* Graph::getNextEdge(int from, int to, bool* visited) {
+Edge* Graph::getNextEdge(bool* visited) {
 	Edge* minEdge = nullptr;
 	int maxWeight = 9999;
 	ListNode<int>* p;
@@ -398,7 +360,7 @@ Edge* Graph::getNextEdge(int from, int to, bool* visited) {
 			while (p != nullptr) {
 				if (p->weight < maxWeight && !visited[p->data]) {
 					maxWeight = p->weight;
-					minEdge = new Edge(from, p->data, p->weight);
+					minEdge = new Edge(i, p->data, p->weight);
 				}
 				p = p->link;
 			}
@@ -418,36 +380,26 @@ void Prim(Graph graph, int n) {
 	Heap* hp = new Heap(100);
 	for (int j = 0; j < edgeNum; j++)
 		hp->Insert(&edgeSet[j]);
-	Sets* m = new Sets(20);
 	bool* visited = new bool[n];
 	for (int i = 0; i < n; i++)
 		visited[i] = false;
-	// choose an edge (v,w) from E of lowest cost
-	Edge* nextEdge = hp->DeleteMin();
-	while (t < n - 1)// t contains less than n-1 edges
-	{
+	visited[0] = true;
+	Edge* nextEdge = graph.getNextEdge(visited);
+	while(t < n - 1) {
 		if (nextEdge == nullptr)
 			break;
 		int from = nextEdge->src, to = nextEdge->dest;
-		if (m->SimpleFind(from) == m->SimpleFind(to)) {
-			nextEdge = graph.getNextEdge(from, to, visited);//cycle을 만들면 skip
-			continue;
-		}
-		m->SimpleUnion(from, to);
 		visited[from] = visited[to] = true;
 		result[t++] = *nextEdge;
-		//set에 있는 모든 노드들에 인접한 edge에서 아직 방문하지 않은 노드들을 연결한 edge의 가중치가 가장 작은 것
-		nextEdge = graph.getNextEdge(from, to, visited);
-		// Else discard the next_edge
+		nextEdge = graph.getNextEdge(visited);
 	}
 	if (t < n - 1) {
 		cout << "no spanning tree" << endl;
 		return;
 	}
-
 	for (int k = 0; k < t; k++)
 		cout << result[k];
-	delete[]visited;
+	delete[] visited;
 	visited = nullptr;
 }
 
@@ -466,6 +418,7 @@ void Sollin(Graph graph, int n) {
 	for (int i = 0; i < n; i++)
 		visited[i] = false;
 	Edge* p = hp->DeleteMin();
+	//from과 to가 !visited[]인 Edge만 result에 추가
 	while (!hp->isEmpty()) {
 		int from = p->src, to = p->dest;
 		if (!visited[from] || !visited[to]) {
@@ -483,7 +436,7 @@ void Sollin(Graph graph, int n) {
 		if (q == nullptr)
 			break;
 		int from = q->src, to = q->dest;
-		if (m->SimpleFind(from) == m->SimpleFind(to)) {//cycle을 만들면 skip
+		if (m->SimpleFind(from) == m->SimpleFind(to)) {
 			q = hp2->DeleteMin();
 			continue;
 		}
@@ -491,6 +444,10 @@ void Sollin(Graph graph, int n) {
 		visited[from] = visited[to] = true;
 		result[t++] = *q;
 		q = hp2->DeleteMin();
+	}
+	if (t < n - 1) {
+		cout << "no spanning tree" << endl;
+		return;
 	}
 	for (int k = 0; k < t; k++)
 		cout << result[k];
